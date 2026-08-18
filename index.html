@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistem Penyelenggaraan PRV & ALT - Water Supply Command Centre">
+    <title>Sistem Penyelenggaraan PRV & ALT</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-blue: #006994;
+            --deep-blue: #004d6e;
+            --water-blue: #00b3b3;
+            --teal: #008080;
+            --soft-grey: #f5f7fa;
+            --white: #ffffff;
+            --text-dark: #1a1a1a;
+            --text-medium: #4a4a4a;
+            --text-light: #6b7280;
+            --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-medium: 0 6px 12px rgba(0, 0, 0, 0.1);
+            --shadow-large: 0 12px 24px rgba(0, 0, 0, 0.15);
+            --border-radius: 8px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --border-color: #e5e7eb;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #dc2626;
+            --info-color: #3b82f6;
+        }
+
+        [data-theme="night"] {
+            --primary-blue: #0088cc;
+            --deep-blue: #003d5c;
+            --water-blue: #00cccc;
+            --soft-grey: #1a1a1a;
+            --white: #2a2a2a;
+            --text-dark: #ffffff;
+            --text-medium: #cccccc;
+            --text-light: #aaaaaa;
+            --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --shadow-medium: 0 6px 12px rgba(0, 0, 0, 0.4);
+            --shadow-large: 0 12px 24px rgba(0, 0, 0, 0.5);
+            --border-color: #444444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--soft-grey);
+            color: var(--text-dark);
+            transition: background 0.3s ease, color 0.3s ease;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
+        }
+
+        /* Opening Animation */
+        #opening-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: openingFade 2s ease forwards;
+            pointer-events: none;
+        }
+
+        @keyframes openingFade {
+            0% { opacity: 1; background: #000000; }
+            30% { opacity: 1; background: #003d5c; }
+            70% { opacity: 1; background: #005a80; }
+            100% { opacity: 0; background: var(--soft-grey); visibility: hidden; }
+        }
+
+        .opening-content {
+            text-align: center;
+            color: white;
+            animation: contentFade 2s ease forwards;
+        }
+
+        @keyframes contentFade {
+            0% { opacity: 0; transform: translateY(30px); }
+            40% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-30px); }
+        }
+
+        .water-drop {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            animation: dropPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes dropPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .opening-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.05em;
+            color: white;
+        }
+
+        .opening-subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-bottom: 2rem;
+            letter-spacing: 0.1em;
+        }
+
+        .loading-bar {
+            width: 250px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .loading-progress {
+            width: 0%;
+            height: 100%;
+            background: var(--water-blue);
+            animation: loadingProgress 1.8s ease forwards;
+        }
+
+        @keyframes loadingProgress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Header */
+        .header {
+            background: var(--white);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-soft);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: var(--transition);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-left {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .system-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            letter-spacing: 0.02em;
+            line-height: 1.2;
+        }
+
+        .system-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+            letter-spacing: 0.1em;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .last-updated {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-right: 0.5rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius);
+            border: 2px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 44px;
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-outline {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--deep-blue);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-secondary {
+            background: var(--soft-grey);
+            color: var(--text-dark);
+            border-color: var(--border-color);
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            min-height: 36px;
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid currentColor;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* User Info & Logout */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .role-badge {
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .role-badge.admin {
+            background: #f59e0b;
+            color: #1a1a1a;
+        }
+
+        /* Main Nav */
+        .main-nav {
+            background: var(--white);
+            padding: 0 2rem;
+            display: flex;
+            gap: 0.5rem;
+            box-shadow: var(--shadow-soft);
+            position: sticky;
+            top: 80px;
+            z-index: 90;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            padding: 1rem 1.5rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-light);
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+            position: relative;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .nav-tab:hover {
+            color: var(--primary-blue);
+            background: var(--soft-grey);
+        }
+
+        .nav-tab.active {
+            color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: tabFadeIn 0.3s ease;
+        }
+
+        @keyframes tabFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard Container Styles */
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <script>
+        (function() {
+            const IDLE_TIMEOUT_LIMIT = 15 * 60 * 1000; // 15 Minit
+            const MAX_SESSION_LIMIT = 60 * 60 * 1000;  // 1 Jam
+            
+            let idleTimer;
+
+            function checkAuthSession() {
+                const authToken = localStorage.getItem('AUTH_TOKEN');
+                const loginTime = localStorage.getItem('LOGIN_TIMESTAMP');
+                const now = new Date().getTime();
+
+                // 1. Semak wujudnya token sesi
+                if (!authToken || !loginTime) {
+                    window.location.replace('login.html');
+                    return;
+                }
+
+                // 2. Semak Maximum Session (1 Jam)
+                if (now - parseInt(loginTime) > MAX_SESSION_LIMIT) {
+                    alert('Sesi anda telah tamat tempoh (1 jam). Sila log masuk semula.');
+                    destroySessionAndRedirect();
+                }
+            }
+
+            function resetIdleTimer() {
+                clearTimeout(idleTimer);
+                idleTimer = setTimeout(() => {
+                    alert('Anda telah terbiar (idle) selama 15 minit. Sistem log keluar secara automatik.');
+                    destroySessionAndRedirect();
+                }, IDLE_TIMEOUT_LIMIT);
+            }
+
+            function destroySessionAndRedirect() {
+                localStorage.removeItem('AUTH_TOKEN');
+                localStorage.removeItem('USER_ROLE');
+                localStorage.removeItem('USERNAME');
+                localStorage.removeItem('LOGIN_TIMESTAMP');
+                window.location.replace('login.html');
+            }
+
+            // Jalankan semakan semasa muat turun
+            checkAuthSession();
+
+            // Set LOGIN_TIMESTAMP jika belum ada
+            if (!localStorage.getItem('LOGIN_TIMESTAMP')) {
+                localStorage.setItem('LOGIN_TIMESTAMP', new Date().getTime());
+            }
+
+            // Pantau aktiviti pengguna untuk Idle Timeout
+            window.addEventListener('mousemove', resetIdleTimer);
+            window.addEventListener('keypress', resetIdleTimer);
+            window.addEventListener('click', resetIdleTimer);
+            window.addEventListener('scroll', resetIdleTimer);
+
+            resetIdleTimer();
+
+            // Cegah isu butang "Back" pelayar web
+            window.addEventListener('pageshow', function(event) {
+                if (event.persisted || (performance.getEntriesByType("navigation")[0] && performance.getEntriesByType("navigation")[0].type === "back_forward")) {
+                    checkAuthSession();
+                }
+            });
+        })();
+    </script>
+
+    <div id="opening-animation">
+        <div class="opening-content">
+            <div class="water-drop">
+                <svg viewBox="0 0 24 24" fill="var(--water-blue)">
+                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                </svg>
+            </div>
+            <div class="opening-title">PRV & ALT COMMAND CENTRE</div>
+            <div class="opening-subtitle">Sistem Penyelenggaraan Port Dickson</div>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <header class="header">
+        <div class="header-left">
+            <h1 class="system-title">Penyelenggaraan PRV & ALT</h1>
+            <div class="system-subtitle">Water Supply Management System</div>
+        </div>
+        <div class="header-right">
+            <span class="last-updated" id="last-updated-text"></span>
+            <div class="user-info">
+                <span id="username-display" style="font-weight: 600; font-size: 0.9rem;"></span>
+                <span class="role-badge" id="role-badge-display">USER</span>
+            </div>
+            <button class="btn btn-danger btn-small" id="logoutBtn" onclick="handleLogout()">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path d="M16 17v-3H9v-4h7V7l5 5-5 5M14 2a2 2 0 0 1 2 2v2h-2V4H5v16h9v-2h2v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9z"/>
+                </svg>
+                Log Keluar
+            </button>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <button class="nav-tab active" data-tab="dashboard">Dashboard Utama</button>
+        <button class="nav-tab" data-tab="records">Senarai Rekod</button>
+        <button class="nav-tab" data-tab="input">Tambah Rekod</button>
+    </nav>
+
+    <main>
+        <section id="tab-dashboard" class="tab-content active">
+            <div class="dashboard-container">
+                <h2>Ringkasan Operasi</h2>
+                <p>Selamat datang ke sistem pengurusan PRV & ALT SAINS Port Dickson.</p>
+                </div>
+        </section>
+
+        <section id="tab-records" class="tab-content">
+            <div class="dashboard-container">
+                <h2>Senarai Rekod Penyelenggaraan</h2>
+                </div>
+        </section>
+
+        <section id="tab-input" class="tab-content">
+            <div class="dashboard-container">
+                <h2>Tambah Rekod Baru</h2>
+                </div>
+        </section>
+    </main>
+
+    <script>
+        // Fungsi Log Keluar
+        function handleLogout() {
+            if (confirm('Adakah anda pasti mahu log keluar?')) {
+                localStorage.removeItem('AUTH_TOKEN');
+                localStorage.removeItem('USER_ROLE');
+                localStorage.removeItem('USERNAME');
+                localStorage.removeItem('LOGIN_TIMESTAMP');
+                window.location.replace('login.html');
+            }
+        }
+
+        // Paparkan maklumat pengguna semasa log masuk
+        document.addEventListener('DOMContentLoaded', () => {
+            const username = localStorage.getItem('USERNAME') || 'Pengguna';
+            const role = localStorage.getItem('USER_ROLE') || 'USER';
+
+            const userDisplay = document.getElementById('username-display');
+            const roleDisplay = document.getElementById('role-badge-display');
+
+            if (userDisplay) userDisplay.textContent = username;
+            if (roleDisplay) {
+                roleDisplay.textContent = role;
+                if (role.toUpperCase().includes('ADMIN')) {
+                    roleDisplay.classList.add('admin');
+                } else {
+                    roleDisplay.classList.add('user');
+                }
+            }
+
+            // Tab Navigation Logic
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.getAttribute('data-tab');
+                    
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+
+                    const targetContent = document.getElementById(`tab-${target}`);
+                    if (targetContent) targetContent.classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
