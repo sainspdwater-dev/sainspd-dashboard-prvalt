@@ -1666,7 +1666,7 @@
         }
 
         // ============================================
-        // PRINT MANAGER (DINAMIK PATH LOGO & 1 PAGE FIT)
+        // PRINT MANAGER (SYNC WINDOW.OPEN UNTUK ELAK POPUP BLOCKER)
         // ============================================
         class PrintManager {
             constructor() {}
@@ -1683,15 +1683,25 @@
                     return;
                 }
 
+                // 1. Buka tetingkap baru secara SERENTAK (sync) untuk elak disekat popup blocker
+                const printWindow = window.open('', '_blank');
+                if (!printWindow) {
+                    alert('Sila benarkan pop-up pada pelayar web anda untuk mencetak.');
+                    return;
+                }
+                
+                // Paparkan mesej loading sementara fetch fail
+                printWindow.document.write('<html><head><title>Memuatkan Borang...</title></head><body style="font-family:sans-serif; text-align:center; padding-top:100px;"><h2>Sedang memuatkan templat borang cetakan...</h2></body></html>');
+
                 try {
                     const response = await fetch('borang.htm');
                     if (!response.ok) throw new Error('Gagal memuatkan fail borang.htm');
                     let htmlContent = await response.text();
 
-                    // 1. Secara automatik betulkan path folder imej/logo apa jua nombor Excel (cth: borang_19777_files -> borang_files)
+                    // 2. Betulkan path direktori logo secara dinamik
                     htmlContent = htmlContent.replace(/borang[^\/]*_files\//g, 'borang_files/');
 
-                    // 2. CSS cetakan untuk pastikan muat 1 halaman A4 sahaja dengan sempurna
+                    // 3. CSS cetakan untuk 1 halaman A4 sahaja
                     const printStyleFix = `
                     <style>
                         @media print {
@@ -1717,7 +1727,7 @@
                     </head>`;
                     htmlContent = htmlContent.replace('</head>', printStyleFix);
 
-                    // 3. Skrip suntikan data dinamik
+                    // 4. Skrip suntikan data dinamik
                     const injectionScript = `
                     <script>
                         window.addEventListener('DOMContentLoaded', () => {
@@ -1755,18 +1765,14 @@
 
                     htmlContent = htmlContent.replace('</body>', injectionScript);
 
-                    // 4. Buka tetingkap menggunakan document.write() untuk buang "blob:" URL dan tarikh cetakan pelayar
-                    const printWindow = window.open('', '_blank', 'width=900,height=1100');
-                    if (printWindow) {
-                        printWindow.document.open();
-                        printWindow.document.write(htmlContent);
-                        printWindow.document.close();
-                    } else {
-                        alert('Sila benarkan pop-up pada pelayar anda untuk mencetak.');
-                    }
+                    // 5. Masukkan kandungan sebenar ke dalam tetingkap cetak
+                    printWindow.document.open();
+                    printWindow.document.write(htmlContent);
+                    printWindow.document.close();
 
                 } catch (err) {
                     console.error(err);
+                    printWindow.close();
                     alert('Ralat: Sila pastikan sistem dibuka melalui Local Server / Live Server / GitHub Pages.');
                 }
             }
