@@ -1666,7 +1666,7 @@
         }
 
         // ============================================
-        // PRINT MANAGER (SYNC WINDOW.OPEN UNTUK ELAK POPUP BLOCKER)
+        // PRINT MANAGER (ROBUST TEXT-NODE REPLACEMENT)
         // ============================================
         class PrintManager {
             constructor() {}
@@ -1683,14 +1683,13 @@
                     return;
                 }
 
-                // 1. Buka tetingkap baru secara SERENTAK (sync) untuk elak disekat popup blocker
+                // 1. Buka tetingkap baru secara sync untuk elak popup blocker
                 const printWindow = window.open('', '_blank');
                 if (!printWindow) {
                     alert('Sila benarkan pop-up pada pelayar web anda untuk mencetak.');
                     return;
                 }
                 
-                // Paparkan mesej loading sementara fetch fail
                 printWindow.document.write('<html><head><title>Memuatkan Borang...</title></head><body style="font-family:sans-serif; text-align:center; padding-top:100px;"><h2>Sedang memuatkan templat borang cetakan...</h2></body></html>');
 
                 try {
@@ -1727,27 +1726,35 @@
                     </head>`;
                     htmlContent = htmlContent.replace('</head>', printStyleFix);
 
-                    // 4. Skrip suntikan data dinamik
+                    // 4. Skrip Imbasan Menyeluruh (Text Walker) untuk menggantikan placeholder tanpa bergantung pada kelas Excel
                     const injectionScript = `
                     <script>
+                        function replaceTextInNode(node, record) {
+                            if (node.nodeType === Node.TEXT_NODE) {
+                                let val = node.nodeValue;
+                                if (val) {
+                                    val = val.replace(/\\{\\{LOKASI\\}\\}/g, record.lokasi || '-')
+                                             .replace(/\\{\\{ZON\\}\\}/g, record.zon || '-')
+                                             .replace(/\\{\\{JENIS_PENYELENGGARAAN\\}\\}/g, record.jenisPenyelenggaraan || '-')
+                                             .replace(/\\{\\{TARIKH\\}\\}/g, record.tarikh || '-')
+                                             .replace(/\\{\\{MASA_MULA\\}\\}/g, record.masaMula || '-')
+                                             .replace(/\\{\\{MASA_SIAP\\}\\}/g, record.masaSiap || '-')
+                                             .replace(/\\{\\{DILAKSANAKAN_OLEH\\}\\}/g, record.dilaksanakanOleh || '-')
+                                             .replace(/\\{\\{SAIZ\\}\\}/g, record.saiz || '-')
+                                             .replace(/\\{\\{TINDAKAN\\s*&\\s*ULASAN\\}\\}/g, record.tindakanUlasan || '-');
+                                    node.nodeValue = val;
+                                }
+                            } else {
+                                for (let child of node.childNodes) {
+                                    replaceTextInNode(child, record);
+                                }
+                            }
+                        }
+
                         window.addEventListener('DOMContentLoaded', () => {
                             const record = ${JSON.stringify(recordData)};
                             try {
-                                const xl65Elements = document.querySelectorAll('.xl6512487');
-                                const xl77Elements = document.querySelectorAll('.xl7712487');
-
-                                if (xl65Elements[0]) xl65Elements[0].innerText = record.lokasi || '-';
-                                const zonEl = document.querySelector('.xl11612487');
-                                if (zonEl) zonEl.innerText = record.zon || '-';
-                                if (xl77Elements[0]) xl77Elements[0].innerText = record.jenisPenyelenggaraan || '-';
-                                if (xl77Elements[1]) xl77Elements[1].innerText = record.saiz || '-';
-                                const tarikhEl = document.querySelector('.xl7912487');
-                                if (tarikhEl) tarikhEl.innerText = record.tarikh || '-';
-                                if (xl65Elements[1]) xl65Elements[1].innerText = record.masaMula || '-';
-                                if (xl65Elements[2]) xl65Elements[2].innerText = record.masaSiap || '-';
-                                if (xl77Elements[2]) xl77Elements[2].innerText = record.dilaksanakanOleh || '-';
-                                const tindakanEl = document.querySelector('.xl12312487');
-                                if (tindakanEl) tindakanEl.innerText = record.tindakanUlasan || '-';
+                                replaceTextInNode(document.body, record);
 
                                 setTimeout(() => {
                                     window.print();
@@ -1765,7 +1772,7 @@
 
                     htmlContent = htmlContent.replace('</body>', injectionScript);
 
-                    // 5. Masukkan kandungan sebenar ke dalam tetingkap cetak
+                    // 5. Tulis kandungan ke dalam tetingkap cetakan
                     printWindow.document.open();
                     printWindow.document.write(htmlContent);
                     printWindow.document.close();
