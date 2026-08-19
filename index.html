@@ -1308,20 +1308,37 @@
             }
 
             async refreshData() {
-                const btn = document.getElementById('refresh-btn');
-                btn.disabled = true;
-                btn.innerHTML = `<span class="loading-spinner"></span> Memuat...`;
-
+                this.setLoaderState(true, "Menyegarkan semula data terkini...");
                 try {
+                    // Simpan status tapisan semasa sebelum muat data baru
+                    const currentBulan = this.filters.bulan;
+                    const currentPersonel = this.filters.personel;
+                    const currentJenis = this.filters.jenis;
+                    const currentKategori = this.filters.kategori;
+                    const currentZon = this.filters.zon;
+                    const currentSearch = this.filters.search;
+
+                    // Muat data baharu dari pelayan
                     await this.loadData();
+
+                    // Pulihkan semula pilihan tapisan pengguna
+                    document.getElementById('filter-bulan').value = currentBulan;
+                    document.getElementById('filter-personel').value = currentPersonel;
+                    document.getElementById('filter-jenis').value = currentJenis;
+                    document.getElementById('filter-kategori').value = currentKategori;
+                    document.getElementById('filter-zon').value = currentZon;
+                    document.getElementById('filter-search').value = currentSearch;
+
+                    // Kemas kini paparan dengan mengekalkan tapisan
+                    this.applyFilters();
                     this.updateCharts();
-                    this.updateDashboard();
+                    this.updateKPIs();
+
                     this.showToast('Data berjaya dikemaskini', 'success');
                 } catch (error) {
                     this.showToast('Gagal memuat semula data', 'error');
                 } finally {
-                    btn.disabled = false;
-                    btn.innerHTML = `<svg class="icon" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg> Muat Semula`;
+                    this.setLoaderState(false);
                 }
             }
 
