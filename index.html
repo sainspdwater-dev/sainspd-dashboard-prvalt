@@ -1790,12 +1790,10 @@
                                 // Hadkan ketinggian elemen ulasan jika terlalu panjang supaya sel tidak mengembang
                                 const allTds = document.querySelectorAll('td');
                                 allTds.forEach(td => {
-                                    if (td.innerText.includes(record.tindakanUlasan) && record.tindakanUlasan) {
-                                        td.style.maxHeight = '90px';
-                                        td.style.maxWidth = '450px';
-                                        td.style.overflow = 'hidden';
-                                        td.style.textOverflow = 'ellipsis';
-                                    }
+                                    // Pastikan kita tidak letak max-height yang sangat kecil yang boleh "menelan" teks
+                                    td.style.wordWrap = 'break-word';
+                                    td.style.overflow = 'visible'; // Pastikan ia boleh dilihat
+                                    td.style.maxHeight = 'none';   // Pastikan ketinggian automatik
                                 });
 
                                 setTimeout(() => {
