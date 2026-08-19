@@ -1666,7 +1666,7 @@
         }
 
         // ============================================
-        // PRINT MANAGER (ROBUST TEXT-NODE REPLACEMENT)
+        // PRINT MANAGER (STRICT MARGIN & TEXT CLAMPING)
         // ============================================
         class PrintManager {
             constructor() {}
@@ -1683,7 +1683,6 @@
                     return;
                 }
 
-                // 1. Buka tetingkap baru secara sync untuk elak popup blocker
                 const printWindow = window.open('', '_blank');
                 if (!printWindow) {
                     alert('Sila benarkan pop-up pada pelayar web anda untuk mencetak.');
@@ -1697,16 +1696,15 @@
                     if (!response.ok) throw new Error('Gagal memuatkan fail borang.htm');
                     let htmlContent = await response.text();
 
-                    // 2. Betulkan path direktori logo secara dinamik
                     htmlContent = htmlContent.replace(/borang[^\/]*_files\//g, 'borang_files/');
 
-                    // 3. CSS cetakan untuk 1 halaman A4 sahaja
+                    // CSS Tambahan untuk margin asal dan kawalan kotak Tindakan & Ulasan
                     const printStyleFix = `
                     <style>
                         @media print {
                             @page {
                                 size: A4 portrait;
-                                margin: 3mm;
+                                margin: 5mm;
                             }
                             body, html {
                                 width: 100%;
@@ -1715,18 +1713,24 @@
                                 padding: 0 !important;
                                 -webkit-print-color-adjust: exact;
                             }
+                            /* Ikut skala asal fail borang.htm supaya muat 1 halaman penuh */
                             div[align="center"] {
-                                transform: scale(0.78);
+                                transform: scale(0.82);
                                 transform-origin: top center;
                                 width: 100% !important;
                                 margin: 0 auto !important;
                             }
                         }
+
+                        /* Kawalan ruang Tindakan & Ulasan supaya teks panjang kekal dalam ruang putih */
+                        td {
+                            word-break: break-word;
+                            overflow: hidden;
+                        }
                     </style>
                     </head>`;
                     htmlContent = htmlContent.replace('</head>', printStyleFix);
 
-                    // 4. Skrip Imbasan Menyeluruh (Text Walker) untuk menggantikan placeholder tanpa bergantung pada kelas Excel
                     const injectionScript = `
                     <script>
                         function replaceTextInNode(node, record) {
@@ -1756,6 +1760,18 @@
                             try {
                                 replaceTextInNode(document.body, record);
 
+                                // Hadkan ketinggian elemen ulasan jika terlalu panjang supaya sel tidak mengembang
+                                const allTds = document.querySelectorAll('td');
+                                allTds.forEach(td => {
+                                    if (td.innerText.includes(record.tindakanUlasan) && record.tindakanUlasan) {
+                                        td.style.maxHeight = '90px';
+                                        td.style.maxWidth = '450px';
+                                        td.style.display = 'block';
+                                        td.style.overflow = 'hidden';
+                                        td.style.textOverflow = 'ellipsis';
+                                    }
+                                });
+
                                 setTimeout(() => {
                                     window.print();
                                 }, 800);
@@ -1772,7 +1788,6 @@
 
                     htmlContent = htmlContent.replace('</body>', injectionScript);
 
-                    // 5. Tulis kandungan ke dalam tetingkap cetakan
                     printWindow.document.open();
                     printWindow.document.write(htmlContent);
                     printWindow.document.close();
