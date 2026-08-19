@@ -833,8 +833,32 @@
 <body>
     <script>
         (function() {
-            const IDLE_TIMEOUT_LIMIT = 15 * 60 * 1000;
-            const MAX_SESSION_LIMIT = 60 * 60 * 1000;
+            // ============================================
+            // CONFIGURATION - Kemaskini di sini sahaja!
+            // ============================================
+            const CONFIG = {
+                // 🔐 SECRET KEY - Sama dengan di login.html
+                SECRET_KEY: 'PRV_ALT_a7k2m9x4q8w5e3r6t1y0u7i4o2p9l3n',
+                
+                // 🌐 API URL - Cloudflare Worker URL
+                API_URL: 'https://dashboardprvalt.sainspdwater.workers.dev//',
+                
+                // 🌐 Google Script URL for print
+                GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwlDOBTVNnSPE4EFjXoLbby1C9Si7Km44iU3edAVqDUbEza0A1uYK524AWAAiRJO2YAcg/exec',
+                
+                // ⏱️ Timeout settings
+                TIMEOUT: 30000,
+                DEBOUNCE_DELAY: 300,
+                CACHE_DURATION: 5 * 60 * 1000,
+                
+                // ⏱️ Session settings
+                IDLE_TIMEOUT_LIMIT: 15 * 60 * 1000,
+                MAX_SESSION_LIMIT: 60 * 60 * 1000
+            };
+
+            // ============================================
+            // SESSION MANAGEMENT
+            // ============================================
             let idleTimer;
 
             function checkAuthSession() {
@@ -847,7 +871,7 @@
                     return;
                 }
 
-                if (now - parseInt(loginTime) > MAX_SESSION_LIMIT) {
+                if (now - parseInt(loginTime) > CONFIG.MAX_SESSION_LIMIT) {
                     alert('Sesi anda telah tamat tempoh (1 jam). Sila log masuk semula.');
                     destroySessionAndRedirect();
                 }
@@ -858,7 +882,7 @@
                 idleTimer = setTimeout(() => {
                     alert('Anda telah terbiar (idle) selama 15 minit. Sistem log keluar secara automatik.');
                     destroySessionAndRedirect();
-                }, IDLE_TIMEOUT_LIMIT);
+                }, CONFIG.IDLE_TIMEOUT_LIMIT);
             }
 
             function destroySessionAndRedirect() {
@@ -886,6 +910,15 @@
                     checkAuthSession();
                 }
             });
+
+            // ============================================
+            // LOGOUT FUNCTION
+            // ============================================
+            window.handleLogout = function() {
+                if (confirm('Adakah anda pasti mahu log keluar?')) {
+                    destroySessionAndRedirect();
+                }
+            };
         })();
     </script>
 
@@ -1110,7 +1143,7 @@
         </div>
     </div>
 
-    <!-- Print Preview Modal - Now opens in new tab -->
+    <!-- Print Preview Modal -->
     <div id="print-preview-modal" class="modal hidden no-print" role="dialog" aria-labelledby="print-preview-title">
         <div class="modal-content print-modal-content">
             <div class="modal-header">
@@ -1133,30 +1166,16 @@
 
     <script>
         // ============================================
-        // CONFIGURATION
+        // CONFIG - Sama dengan di atas
         // ============================================
         const CONFIG = {
+            SECRET_KEY: 'PRV_ALT_a7k2m9x4q8w5e3r6t1y0u7i4o2p9l3n',
             API_URL: 'https://dashboardprvalt.sainspdwater.workers.dev/',
             GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwlDOBTVNnSPE4EFjXoLbby1C9Si7Km44iU3edAVqDUbEza0A1uYK524AWAAiRJO2YAcg/exec',
-            INTERNAL_SECRET: 'dashboard_2366211_prv_alt',
-            REQUEST_TIMEOUT: 10000,
+            TIMEOUT: 30000,
             DEBOUNCE_DELAY: 300,
-            CACHE_DURATION: 5 * 60 * 1000,
-            THEME_STORAGE_KEY: 'prv-alt-theme'
+            CACHE_DURATION: 5 * 60 * 1000
         };
-
-        // ============================================
-        // FUNGSI LOG KELUAR
-        // ============================================
-        function handleLogout() {
-            if (confirm('Adakah anda pasti mahu log keluar?')) {
-                localStorage.removeItem('AUTH_TOKEN');
-                localStorage.removeItem('USER_ROLE');
-                localStorage.removeItem('USERNAME');
-                localStorage.removeItem('LOGIN_TIMESTAMP');
-                window.location.replace('login.html');
-            }
-        }
 
         // ============================================
         // API SERVICE
@@ -1166,10 +1185,14 @@
                 this.authToken = localStorage.getItem('AUTH_TOKEN') || '';
                 this.userRole = localStorage.getItem('USER_ROLE') || 'USER';
                 this.username = localStorage.getItem('USERNAME') || 'User';
+                this.secretKey = CONFIG.SECRET_KEY;
             }
 
             async request(action, data = {}) {
                 try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), CONFIG.TIMEOUT);
+
                     const response = await fetch(CONFIG.API_URL, {
                         method: 'POST',
                         headers: {
@@ -1177,12 +1200,19 @@
                         },
                         body: JSON.stringify({
                             action: action,
-                            internalSecret: CONFIG.INTERNAL_SECRET,
+                            internalSecret: this.secretKey,
                             authToken: this.authToken,
                             userRole: this.userRole,
                             ...data
-                        })
+                        }),
+                        signal: controller.signal
                     });
+
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
 
                     const result = await response.json();
                     if (!result.success) {
@@ -1260,7 +1290,7 @@
             }
 
             initTheme() {
-                const savedTheme = localStorage.getItem(CONFIG.THEME_STORAGE_KEY) || 'light';
+                const savedTheme = localStorage.getItem('prv-alt-theme') || 'light';
                 if (savedTheme === 'night') {
                     document.documentElement.setAttribute('data-theme', 'night');
                 }
@@ -1274,7 +1304,7 @@
                 } else {
                     document.documentElement.removeAttribute('data-theme');
                 }
-                localStorage.setItem(CONFIG.THEME_STORAGE_KEY, newTheme);
+                localStorage.setItem('prv-alt-theme', newTheme);
             }
 
             bindEvents() {
@@ -1328,6 +1358,10 @@
                         lainGroup.classList.add('hidden');
                     }
                 });
+
+                document.getElementById('print-modal-close').addEventListener('click', () => this.closePrintModal());
+                document.getElementById('print-modal-cancel').addEventListener('click', () => this.closePrintModal());
+                document.getElementById('print-confirm-btn').addEventListener('click', () => this.confirmPrint());
             }
 
             switchTab(tabName) {
@@ -1408,12 +1442,14 @@
                     if (!select) return;
                     const currentVal = select.value;
                     select.innerHTML = `<option value="">${defaultText}</option>`;
-                    options.forEach(opt => {
-                        const option = document.createElement('option');
-                        option.value = opt;
-                        option.textContent = opt;
-                        select.appendChild(option);
-                    });
+                    if (options && Array.isArray(options)) {
+                        options.forEach(opt => {
+                            const option = document.createElement('option');
+                            option.value = opt;
+                            option.textContent = opt;
+                            select.appendChild(option);
+                        });
+                    }
                     select.value = currentVal;
                 };
 
@@ -1692,6 +1728,25 @@
                 }
             }
 
+            closePrintModal() {
+                document.getElementById('print-preview-modal').classList.add('hidden');
+            }
+
+            confirmPrint() {
+                const printContent = document.getElementById('print-modal-body').innerHTML;
+                const printWindow = window.open('', '_blank', 'width=800,height=600');
+                if (printWindow) {
+                    printWindow.document.write(`
+                        <html><head><title>Cetakan PRV & ALT</title>
+                        <style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;}td,th{border:1px solid #ddd;padding:8px;text-align:left;}th{background:#006994;color:white;}
+</style></head>
+<body>${printContent}</body></html>
+`);
+                    printWindow.document.close();
+                    printWindow.print();
+                }
+            }
+
             updateAuthUI() {
                 const username = localStorage.getItem('USERNAME') || 'Pengguna';
                 const role = localStorage.getItem('USER_ROLE') || 'USER';
@@ -1743,23 +1798,18 @@
         }
 
         // ============================================
-        // PRINT MANAGER - Terus ke Google Apps Script
+        // PRINT MANAGER
         // ============================================
         class PrintManager {
-            constructor() {
-                // Tiada event binding diperlukan
-            }
+            constructor() {}
 
             async openPrintPreview(serialNo) {
                 try {
-                    // Google Apps Script URL
-                    var scriptUrl = CONFIG.GOOGLE_SCRIPT_URL;
-                    var url = scriptUrl + '?serialNo=' + encodeURIComponent(serialNo) + '&action=view';
+                    const scriptUrl = CONFIG.GOOGLE_SCRIPT_URL;
+                    const url = scriptUrl + '?serialNo=' + encodeURIComponent(serialNo) + '&action=view';
                     
-                    // Buka dalam tab baru dan simpan rujukan tetingkap
-                    var printWindow = window.open(url, '_blank');
+                    const printWindow = window.open(url, '_blank');
                     
-                    // Tutup tetingkap pop-up secara automatik selepas 5 saat
                     if (printWindow) {
                         setTimeout(() => {
                             if (!printWindow.closed) {
@@ -1780,9 +1830,10 @@
         const dashboard = new Dashboard();
         const printManager = new PrintManager();
 
-        console.log('✅ PRV & ALT Dashboard initialized');
+        console.log('✅ PRV & ALT Dashboard initialized (Secure Version)');
         console.log('📡 API URL:', CONFIG.API_URL);
         console.log('🖨️ Google Script URL:', CONFIG.GOOGLE_SCRIPT_URL);
+        console.log('🔑 Secret Key:', CONFIG.SECRET_KEY ? '***SET***' : '❌ MISSING!');
     </script>
 </body>
 </html>
