@@ -1764,6 +1764,7 @@
                             if (node.nodeType === Node.TEXT_NODE) {
                                 let val = node.nodeValue;
                                 if (val) {
+                                    val = val.replace(/\{\{TINDAKAN[\s\/\&]+ULASAN\}\}/g, record.tindakanUlasan || '-')
                                     val = val.replace(/\\{\\{LOKASI\\}\\}/g, record.lokasi || '-')
                                              .replace(/\\{\\{ZON\\}\\}/g, record.zon || '-')
                                              .replace(/\\{\\{JENIS_PENYELENGGARAAN\\}\\}/g, record.jenisPenyelenggaraan || '-')
@@ -1772,7 +1773,6 @@
                                              .replace(/\\{\\{MASA_SIAP\\}\\}/g, record.masaSiap || '-')
                                              .replace(/\\{\\{DILAKSANAKAN_OLEH\\}\\}/g, record.dilaksanakanOleh || '-')
                                              .replace(/\\{\\{SAIZ\\}\\}/g, record.saiz || '-')
-                                             .replace(/\\{\\{TINDAKAN\\s*&\\s*ULASAN\\}\\}/g, record.tindakanUlasan || '-');
                                     node.nodeValue = val;
                                 }
                             } else {
