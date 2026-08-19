@@ -292,6 +292,12 @@
             box-shadow: 0 5px 15px #001a2e;
         }
 
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .message-area {
             text-align: center;
             margin-top: 1.4rem;
@@ -300,6 +306,18 @@
             color: #ff9e9e;
             transition: 0.3s;
             font-size: 0.9rem;
+        }
+
+        .message-area.loading {
+            color: #ffcc00;
+        }
+
+        .message-area.success {
+            color: #7fd4a8;
+        }
+
+        .message-area.error {
+            color: #ff9e9e;
         }
 
         .info-bubbles {
@@ -342,14 +360,14 @@
         <div class="input-group">
             <label for="username">ID Pengguna</label>
             <div class="input-wrapper">
-                <input type="text" id="username" placeholder="cth: admin" autocomplete="off">
+                <input type="text" id="username" placeholder="cth: sainspd" autocomplete="off" value="sainspd">
             </div>
         </div>
 
         <div class="input-group">
             <label for="password">Kata Laluan</label>
             <div class="input-wrapper">
-                <input type="password" id="password" placeholder="••••••••" autocomplete="off">
+                <input type="password" id="password" placeholder="••••••••" autocomplete="off" value="sainspd">
                 <button class="show-password-btn" id="togglePasswordBtn" type="button" title="Tunjuk/sembunyi kata laluan">
                     <svg id="eyeIcon" viewBox="0 0 24 24">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -370,6 +388,28 @@
 
     <script>
         (function() {
+            // ============================================
+            // CONFIGURATION - Kemaskini di sini sahaja!
+            // ============================================
+            const CONFIG = {
+                // 🔐 SECRET KEY - Dapatkan dari GAS setup() log
+                // Jalankan setup() di GAS dan salin key dari log
+                SECRET_KEY: 'PRV_ALT_3f7g9h2k4m6n8p1q3r5t7v9x2z4b6c8d',
+                
+                // 🌐 API URL - Cloudflare Worker URL
+                API_URL: 'https://dashboardprvalt.sainspddriver.workers.dev/',
+                
+                // ⏱️ Retry settings
+                MAX_RETRY: 3,
+                RETRY_DELAY: 2000,
+                
+                // ⏱️ Timeout settings
+                TIMEOUT: 30000
+            };
+
+            // ============================================
+            // DOM ELEMENTS
+            // ============================================
             const authCard = document.getElementById('authCard');
             const usernameInput = document.getElementById('username');
             const passwordInput = document.getElementById('password');
@@ -378,7 +418,9 @@
             const messageBox = document.getElementById('messageBox');
             const eyeIcon = document.getElementById('eyeIcon');
 
-            // Togol lihat/sembunyi kata laluan
+            // ============================================
+            // TOGGLE PASSWORD VISIBILITY
+            // ============================================
             toggleBtn.addEventListener('click', function() {
                 const type = passwordInput.getAttribute('type');
                 if (type === 'password') {
@@ -397,6 +439,14 @@
                 }
             });
 
+            // ============================================
+            // UI HELPERS
+            // ============================================
+            function setMessage(text, type = 'error') {
+                messageBox.textContent = text;
+                messageBox.className = 'message-area ' + type;
+            }
+
             function triggerVibrate() {
                 authCard.classList.remove('fade-to-black', 'vibrate-fail');
                 void authCard.offsetWidth;
@@ -412,78 +462,140 @@
                 authCard.classList.add('fade-to-black');
             }
 
-            // Logik Proses Log Masuk
+            function setLoading(isLoading) {
+                if (isLoading) {
+                    loginBtn.disabled = true;
+                    loginBtn.innerHTML = '<span class="loading-spinner"></span> MENGESAHKAN...';
+                    setMessage('⏳ Sila tunggu...', 'loading');
+                } else {
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Log Masuk';
+                }
+            }
+
+            // ============================================
+            // LOGIN FUNCTION WITH RETRY
+            // ============================================
+            function attemptLogin(username, hashedPassword, retryCount = 0) {
+                const payload = {
+                    action: 'authenticate',
+                    internalSecret: CONFIG.SECRET_KEY,
+                    username: username,
+                    password: hashedPassword
+                };
+
+                console.log('📤 Sending login request...');
+
+                // Create timeout promise
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Request timeout')), CONFIG.TIMEOUT);
+                });
+
+                // Create fetch promise
+                const fetchPromise = fetch(CONFIG.API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                // Race between fetch and timeout
+                return Promise.race([fetchPromise, timeoutPromise])
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('📨 Response received:', data);
+                        
+                        if (data.success) {
+                            return { success: true, data: data.data };
+                        } else {
+                            throw new Error(data.message || 'Authentication failed');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('❌ Attempt ' + (retryCount + 1) + ' failed:', error.message);
+                        
+                        // Retry logic
+                        if (retryCount < CONFIG.MAX_RETRY - 1) {
+                            const nextRetry = retryCount + 1;
+                            setMessage(`⏳ Cubaan ${nextRetry}/${CONFIG.MAX_RETRY}...`, 'loading');
+                            console.log(`🔄 Retry ${nextRetry}/${CONFIG.MAX_RETRY} in ${CONFIG.RETRY_DELAY}ms`);
+                            
+                            return new Promise((resolve) => {
+                                setTimeout(() => {
+                                    resolve(attemptLogin(username, hashedPassword, nextRetry));
+                                }, CONFIG.RETRY_DELAY);
+                            });
+                        }
+                        
+                        // Max retries reached
+                        throw error;
+                    });
+            }
+
+            // ============================================
+            // LOGIN BUTTON CLICK HANDLER
+            // ============================================
             loginBtn.addEventListener('click', function(e) {
                 e.preventDefault();
+                
                 const username = usernameInput.value.trim();
                 const password = passwordInput.value.trim();
                 
-                messageBox.textContent = '';
+                // Reset message
+                setMessage('');
                 
+                // Validate input
                 if (username === '' || password === '') {
-                    messageBox.style.color = '#ff9e9e';
-                    messageBox.textContent = '⚠️ Sila isi ID dan kata laluan.';
+                    setMessage('⚠️ Sila isi ID dan kata laluan.', 'error');
                     triggerVibrate();
                     return;
                 }
 
-                loginBtn.disabled = true;
-                loginBtn.textContent = 'MENGESAHKAN...';
+                // Show loading state
+                setLoading(true);
 
-                // Sulitkan kata laluan kepada SHA-256 di frontend sebelum hantar
+                // Hash password
                 const hashedPassword = CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
+                console.log('🔐 Password hashed');
 
-                // Tetapan URL Cloudflare Worker anda (Gantikan dengan URL Worker sebenar anda jika perlu)
-                const apiURL = 'https://dashboardprvalt.sainspdwater.workers.dev/'; 
-                const secretKey = 'dashboard_2366211_prv_alt';
-
-                fetch(apiURL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'authenticate',
-                        internalSecret: secretKey,
-                        username: username,
-                        password: hashedPassword
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    loginBtn.disabled = false;
-                    loginBtn.textContent = 'Log Masuk';
-
-                    if (data.success) {
-                        messageBox.style.color = '#7fd4a8';
-                        messageBox.textContent = '✅ Log masuk berjaya! Memuatkan...';
+                // Attempt login with retry
+                attemptLogin(username, hashedPassword)
+                    .then(result => {
+                        setLoading(false);
                         
-                        // Simpan Sesi & Tetapan Masa untuk Idle/Max Session Timeout di index.html
-                        localStorage.setItem('AUTH_TOKEN', data.data.token);
-                        localStorage.setItem('USER_ROLE', data.data.role);
-                        localStorage.setItem('USERNAME', data.data.username);
-                        localStorage.setItem('LOGIN_TIMESTAMP', new Date().getTime());
-
-                        triggerFadeToBlack();
-
-                        setTimeout(() => {
-                            window.location.href = "index.html"; 
-                        }, 1200);
-                    } else {
-                        loginBtn.disabled = false;
-                        loginBtn.textContent = 'Log Masuk';
-                        messageBox.style.color = '#ff9e9e';
-                        messageBox.textContent = '❌ ' + (data.message || 'ID atau kata laluan salah!');
+                        if (result.success) {
+                            setMessage('✅ Log masuk berjaya! Memuatkan...', 'success');
+                            
+                            // Save session
+                            localStorage.setItem('AUTH_TOKEN', result.data.token);
+                            localStorage.setItem('USER_ROLE', result.data.role);
+                            localStorage.setItem('USERNAME', result.data.username);
+                            localStorage.setItem('LOGIN_TIMESTAMP', new Date().getTime());
+                            
+                            console.log('✅ Login successful for:', result.data.username);
+                            
+                            // Fade and redirect
+                            triggerFadeToBlack();
+                            setTimeout(() => {
+                                window.location.href = "index.html";
+                            }, 1200);
+                        }
+                    })
+                    .catch(error => {
+                        setLoading(false);
+                        console.error('❌ Login failed:', error.message);
+                        setMessage('❌ ' + error.message, 'error');
                         triggerVibrate();
-                    }
-                })
-                .catch(error => {
-                    loginBtn.disabled = false;
-                    loginBtn.textContent = 'Log Masuk';
-                    messageBox.style.color = '#ff9e9e';
-                    messageBox.textContent = '⚠️ Ralat sambungan pelayan.';
-                    triggerVibrate();
-                });
+                    });
             });
 
+            // ============================================
+            // ENTER KEY SUPPORT
+            // ============================================
             [usernameInput, passwordInput].forEach(input => {
                 input.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
@@ -493,7 +605,9 @@
                 });
             });
 
-            // ==================== ANIMASI KANVAS PIPELINE ====================
+            // ============================================
+            // CANVAS PIPELINE ANIMATION
+            // ============================================
             const canvas = document.getElementById('pipelineCanvas');
             const ctx = canvas.getContext('2d');
             let W, H;
@@ -579,6 +693,37 @@
                 requestAnimationFrame(animate);
             }
             animate();
+
+            // ============================================
+            // ADD LOADING SPINNER STYLE
+            // ============================================
+            const style = document.createElement('style');
+            style.textContent = `
+                .loading-spinner {
+                    width: 18px;
+                    height: 18px;
+                    border: 2px solid rgba(255,255,255,0.3);
+                    border-top-color: #fff;
+                    border-radius: 50%;
+                    animation: spin 0.8s linear infinite;
+                    display: inline-block;
+                    margin-right: 8px;
+                    vertical-align: middle;
+                }
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+
+            // ============================================
+            // LOG CONFIG (FOR DEBUGGING - Remove in production)
+            // ============================================
+            console.log('🔐 Login Page Loaded');
+            console.log('📡 API URL:', CONFIG.API_URL);
+            console.log('🔑 Secret Key:', CONFIG.SECRET_KEY ? '***SET***' : '❌ MISSING!');
+            console.log('🔄 Max Retry:', CONFIG.MAX_RETRY);
+
         })();
     </script>
 </body>
