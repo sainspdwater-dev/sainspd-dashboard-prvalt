@@ -1721,7 +1721,10 @@
                         @media print {
                             @page {
                                 size: A4 portrait;
-                                margin: 5mm;
+                                margin-top: 17mm;
+                                margin-bottom: 5mm;
+                                margin-left: 26mm;
+                                margin-right: 26mm;;
                             }
                             body, html {
                                 width: 100%;
@@ -1732,7 +1735,7 @@
                             }
                             /* Ikut skala asal fail borang.htm supaya muat 1 halaman penuh */
                             div[align="center"] {
-                                transform: scale(0.82);
+                                transform: scale(0.9);
                                 transform-origin: top center;
                                 width: 100% !important;
                                 margin: 0 auto !important;
