@@ -57,7 +57,6 @@
             color: var(--text-dark);
             transition: background 0.3s ease, color 0.3s ease;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
             min-height: 100vh;
         }
 
@@ -346,7 +345,6 @@
             color: var(--text-light);
             border-bottom: 3px solid transparent;
             transition: var(--transition);
-            position: relative;
             white-space: nowrap;
             flex-shrink: 0;
         }
@@ -394,7 +392,6 @@
             box-shadow: var(--shadow-soft);
             text-align: center;
             transition: var(--transition);
-            cursor: pointer;
             position: relative;
             overflow: hidden;
         }
@@ -464,7 +461,6 @@
             color: var(--text-medium);
             margin-bottom: 1rem;
             text-align: center;
-            letter-spacing: 0.05em;
             font-weight: 600;
         }
 
@@ -496,7 +492,6 @@
             font-size: 0.8rem;
             font-weight: 600;
             color: var(--text-light);
-            letter-spacing: 0.05em;
         }
 
         .filter-select,
@@ -505,7 +500,6 @@
             border: 2px solid var(--border-color);
             border-radius: var(--border-radius);
             font-size: 0.9rem;
-            transition: var(--transition);
             background: var(--white);
             color: var(--text-dark);
             width: 100%;
@@ -549,20 +543,14 @@
             padding: 0.8rem;
             text-align: left;
             font-weight: 600;
-            letter-spacing: 0.05em;
-            white-space: nowrap;
             font-size: 0.8rem;
+            white-space: nowrap;
         }
 
         .data-table td {
             padding: 0.7rem 0.8rem;
             border-bottom: 1px solid var(--border-color);
-            transition: var(--transition);
             vertical-align: middle;
-        }
-
-        .data-table tbody tr {
-            transition: var(--transition);
         }
 
         .data-table tbody tr:hover {
@@ -582,50 +570,16 @@
             cursor: pointer;
             font-weight: 600;
             font-size: 0.75rem;
-            transition: var(--transition);
             color: white;
-            white-space: nowrap;
-            min-height: 32px;
         }
 
-        .btn-update {
-            background: var(--primary-blue);
-        }
+        .btn-update { background: var(--primary-blue); }
+        .btn-print { background: var(--teal); }
 
-        .btn-update:hover {
-            background: var(--deep-blue);
-        }
-
-        .btn-print {
-            background: var(--teal);
-        }
-
-        .btn-print:hover {
-            background: #006666;
-        }
-
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 3rem;
             color: var(--text-light);
-        }
-
-        .empty-state-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .empty-state p {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .empty-subtitle {
-            font-size: 0.9rem;
-            color: var(--text-light);
-            font-weight: 400;
         }
 
         /* Modal */
@@ -640,14 +594,7 @@
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            animation: modalFadeIn 0.3s ease;
             backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-        }
-
-        @keyframes modalFadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
         }
 
         .modal-content {
@@ -659,12 +606,6 @@
             display: flex;
             flex-direction: column;
             box-shadow: var(--shadow-large);
-            animation: modalSlideUp 0.3s ease;
-        }
-
-        @keyframes modalSlideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
         }
 
         .modal-header {
@@ -678,7 +619,6 @@
         .modal-header h2 {
             font-size: 1.1rem;
             font-weight: 600;
-            color: var(--text-dark);
         }
 
         .modal-close {
@@ -687,19 +627,6 @@
             font-size: 1.5rem;
             cursor: pointer;
             color: var(--text-light);
-            transition: var(--transition);
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-
-        .modal-close:hover {
-            color: var(--text-dark);
-            background: var(--soft-grey);
-            transform: scale(1.1);
         }
 
         .modal-body {
@@ -716,7 +643,6 @@
             gap: 0.75rem;
         }
 
-        /* Form */
         .form-group {
             margin-bottom: 1rem;
         }
@@ -726,7 +652,6 @@
             margin-bottom: 0.4rem;
             font-weight: 600;
             font-size: 0.85rem;
-            color: var(--text-dark);
         }
 
         .form-group input,
@@ -737,16 +662,8 @@
             border: 2px solid var(--border-color);
             border-radius: var(--border-radius);
             font-size: 0.9rem;
-            transition: var(--transition);
             background: var(--white);
             color: var(--text-dark);
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--primary-blue);
         }
 
         .form-group input:read-only {
@@ -759,106 +676,47 @@
             min-height: 80px;
         }
 
-        /* Toast Notification */
         .toast {
             position: fixed;
             bottom: 2rem;
             right: 2rem;
             padding: 1rem 1.5rem;
             background: var(--white);
-            color: var(--text-dark);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-large);
             z-index: 10000;
-            animation: toastSlideUp 0.3s ease;
             font-weight: 600;
             font-size: 0.9rem;
             border-left: 4px solid var(--primary-blue);
-            max-width: 400px;
         }
 
         .toast.success { border-left-color: var(--success-color); }
         .toast.error { border-left-color: var(--danger-color); }
 
-        @keyframes toastSlideUp {
-            from { transform: translateY(100px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        /* Table Loading Overlay */
         .table-loading-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(3px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 20;
-            color: var(--primary-blue);
-            font-weight: 600;
-        }
-
-        [data-theme="night"] .table-loading-overlay {
-            background: rgba(42, 42, 42, 0.7);
-            color: var(--water-blue);
-        }
-
-        .table-loading-overlay .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border-width: 4px;
-            margin-bottom: 1rem;
-        }
-
-        @media print {
-            body * { visibility: hidden; }
-            #print-preview-modal, #print-preview-modal * { visibility: visible; }
-            #print-preview-modal {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                background: white;
-            }
-            .no-print { display: none !important; }
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 20; color: var(--primary-blue); font-weight: 600;
         }
     </style>
 </head>
 <body>
     <script>
         (function() {
-            // ============================================
-            // CONFIGURATION - Kemaskini di sini sahaja!
-            // ============================================
+            // Configuration dengan URL GAS dan Secret Key yang baharu
             const CONFIG = {
-                // 🔐 SECRET KEY - Sama dengan di login.html
                 SECRET_KEY: 'PRV_ALT_SAINSPD_2026_SECURE',
-                
-                // 🌐 API URL - Cloudflare Worker URL
                 API_URL: 'https://dashboardprvalt.sainspdwater.workers.dev/',
-                
-                // 🌐 Google Script URL for print
-                GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwlDOBTVNnSPE4EFjXoLbby1C9Si7Km44iU3edAVqDUbEza0A1uYK524AWAAiRJO2YAcg/exec',
-                
-                // ⏱️ Timeout settings
+                GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxYkicFTwbjWSXb-jxuGWiENQTQtQBXMJ1pNEQdbHyzawqqdMrLv1DD17rxuIXPSJNU/exec',
                 TIMEOUT: 30000,
                 DEBOUNCE_DELAY: 300,
-                CACHE_DURATION: 5 * 60 * 1000,
-                
-                // ⏱️ Session settings
                 IDLE_TIMEOUT_LIMIT: 15 * 60 * 1000,
                 MAX_SESSION_LIMIT: 60 * 60 * 1000
             };
 
-            // ============================================
-            // SESSION MANAGEMENT
-            // ============================================
             let idleTimer;
 
             function checkAuthSession() {
@@ -866,54 +724,18 @@
                 const loginTime = localStorage.getItem('LOGIN_TIMESTAMP');
                 const now = new Date().getTime();
 
-                if (!authToken || !loginTime) {
-                    window.location.replace('login.html');
-                    return;
-                }
-
-                if (now - parseInt(loginTime) > CONFIG.MAX_SESSION_LIMIT) {
-                    alert('Sesi anda telah tamat tempoh (1 jam). Sila log masuk semula.');
+                if (!authToken || !loginTime || (now - parseInt(loginTime) > CONFIG.MAX_SESSION_LIMIT)) {
                     destroySessionAndRedirect();
                 }
-            }
-
-            function resetIdleTimer() {
-                clearTimeout(idleTimer);
-                idleTimer = setTimeout(() => {
-                    alert('Anda telah terbiar (idle) selama 15 minit. Sistem log keluar secara automatik.');
-                    destroySessionAndRedirect();
-                }, CONFIG.IDLE_TIMEOUT_LIMIT);
             }
 
             function destroySessionAndRedirect() {
-                localStorage.removeItem('AUTH_TOKEN');
-                localStorage.removeItem('USER_ROLE');
-                localStorage.removeItem('USERNAME');
-                localStorage.removeItem('LOGIN_TIMESTAMP');
+                localStorage.clear();
                 window.location.replace('login.html');
             }
 
             checkAuthSession();
 
-            if (!localStorage.getItem('LOGIN_TIMESTAMP')) {
-                localStorage.setItem('LOGIN_TIMESTAMP', new Date().getTime());
-            }
-
-            window.addEventListener('mousemove', resetIdleTimer);
-            window.addEventListener('keypress', resetIdleTimer);
-            window.addEventListener('click', resetIdleTimer);
-            window.addEventListener('scroll', resetIdleTimer);
-            resetIdleTimer();
-
-            window.addEventListener('pageshow', function(event) {
-                if (event.persisted || (performance.getEntriesByType("navigation")[0] && performance.getEntriesByType("navigation")[0].type === "back_forward")) {
-                    checkAuthSession();
-                }
-            });
-
-            // ============================================
-            // LOGOUT FUNCTION
-            // ============================================
             window.handleLogout = function() {
                 if (confirm('Adakah anda pasti mahu log keluar?')) {
                     destroySessionAndRedirect();
@@ -938,7 +760,7 @@
     <header class="header">
         <div class="header-left">
             <h1 class="system-title">Sistem Penyelenggaraan PRV & ALT</h1>
-            <p class="system-subtitle" id="system-subtitle">Water Supply Command Centre</p>
+            <p class="system-subtitle">Water Supply Command Centre</p>
         </div>
         <div class="header-right">
             <span class="last-updated" id="last-updated">Last Updated: -</span>
@@ -946,17 +768,9 @@
                 <span id="username-display">User</span>
                 <span class="role-badge" id="role-badge-display">USER</span>
             </div>
-            <button class="btn btn-outline btn-small" id="refresh-btn" title="Muat semula data">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
-                Muat Semula
-            </button>
-            <button class="btn btn-outline btn-small" id="theme-toggle" title="Tukar Tema">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.38 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.8.89-3.4 2.26-4.38-.44-.06-.9-.1-1.36-.1z"/></svg>
-            </button>
-            <button class="btn btn-danger btn-small" id="logoutBtn" onclick="handleLogout()" title="Log Keluar">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M16 17v-3H9v-4h7V7l5 5-5 5M14 2a2 2 0 0 1 2 2v2h-2V4H5v16h9v-2h2v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9z"/></svg>
-                Log Keluar
-            </button>
+            <button class="btn btn-outline btn-small" id="refresh-btn">Muat Semula</button>
+            <button class="btn btn-outline btn-small" id="theme-toggle" title="Tukar Tema">Tema</button>
+            <button class="btn btn-danger btn-small" onclick="handleLogout()">Log Keluar</button>
         </div>
     </header>
 
@@ -996,33 +810,23 @@
             <div class="filter-bar">
                 <div class="filter-group">
                     <label for="filter-bulan">Bulan</label>
-                    <select id="filter-bulan" class="filter-select">
-                        <option value="">Semua Bulan</option>
-                    </select>
+                    <select id="filter-bulan" class="filter-select"><option value="">Semua Bulan</option></select>
                 </div>
                 <div class="filter-group">
                     <label for="filter-personel">Pelaksana</label>
-                    <select id="filter-personel" class="filter-select">
-                        <option value="">Semua Pelaksana</option>
-                    </select>
+                    <select id="filter-personel" class="filter-select"><option value="">Semua Pelaksana</option></select>
                 </div>
                 <div class="filter-group">
                     <label for="filter-jenis">Jenis Penyelenggaraan</label>
-                    <select id="filter-jenis" class="filter-select">
-                        <option value="">Semua Jenis</option>
-                    </select>
+                    <select id="filter-jenis" class="filter-select"><option value="">Semua Jenis</option></select>
                 </div>
                 <div class="filter-group">
                     <label for="filter-kategori">Kategori</label>
-                    <select id="filter-kategori" class="filter-select">
-                        <option value="">Semua Kategori</option>
-                    </select>
+                    <select id="filter-kategori" class="filter-select"><option value="">Semua Kategori</option></select>
                 </div>
                 <div class="filter-group">
                     <label for="filter-zon">Zon</label>
-                    <select id="filter-zon" class="filter-select">
-                        <option value="">Semua Zon</option>
-                    </select>
+                    <select id="filter-zon" class="filter-select"><option value="">Semua Zon</option></select>
                 </div>
                 <div class="filter-group">
                     <label for="filter-search">Carian</label>
@@ -1052,19 +856,18 @@
                     </table>
                 </div>
                 <div id="empty-state" class="empty-state hidden">
-                    <div class="empty-state-icon">📊</div>
-                    <p>Tiada rekod dijumpai</p>
-                    <p class="empty-subtitle">Sila cuba ubah pilihan tapisan atau carian anda.</p>
+                    <div style="font-size:3rem; margin-bottom:1rem;">📊</div>
+                    <p style="font-weight:600; font-size:1.1rem;">Tiada rekod dijumpai</p>
                 </div>
             </div>
         </section>
     </main>
 
-    <div id="update-modal" class="modal hidden no-print" role="dialog" aria-labelledby="update-modal-title">
+    <div id="update-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="update-modal-title">KEMASKINI REKOD</h2>
-                <button class="modal-close" id="modal-close" aria-label="Tutup modal">&times;</button>
+                <h2>KEMASKINI REKOD</h2>
+                <button class="modal-close" id="modal-close">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="update-form">
@@ -1088,10 +891,6 @@
                         <label for="modal-pelaksana">Dilaksanakan Oleh</label>
                         <select id="modal-pelaksana" class="filter-select" required></select>
                     </div>
-                    <div class="form-group hidden" id="modal-pelaksana-lain-group">
-                        <label for="modal-pelaksana-lain">Nyatakan Nama Pelaksana</label>
-                        <input type="text" id="modal-pelaksana-lain">
-                    </div>
                     <div class="form-group">
                         <label for="modal-lokasi">Lokasi</label>
                         <input type="text" id="modal-lokasi" required>
@@ -1104,17 +903,9 @@
                             <option value="Lain-lain">Lain-lain</option>
                         </select>
                     </div>
-                    <div class="form-group hidden" id="modal-jenis-lain-group">
-                        <label for="modal-jenis-lain">Nyatakan Jenis Penyelenggaraan</label>
-                        <input type="text" id="modal-jenis-lain">
-                    </div>
                     <div class="form-group">
                         <label for="modal-saiz">Saiz</label>
                         <select id="modal-saiz" class="filter-select" required></select>
-                    </div>
-                    <div class="form-group hidden" id="modal-saiz-lain-group">
-                        <label for="modal-saiz-lain">Masukkan Saiz</label>
-                        <input type="text" id="modal-saiz-lain">
                     </div>
                     <div class="form-group">
                         <label for="modal-kategori">Kategori Penyelenggaraan</label>
@@ -1143,343 +934,159 @@
         </div>
     </div>
 
-    <!-- Print Preview Modal -->
-    <div id="print-preview-modal" class="modal hidden no-print" role="dialog" aria-labelledby="print-preview-title">
-        <div class="modal-content print-modal-content">
-            <div class="modal-header">
-                <h2 id="print-preview-title">Pralayar Cetakan (Print Preview)</h2>
-                <button class="modal-close" id="print-modal-close" aria-label="Tutup modal">&times;</button>
-            </div>
-            <div class="print-modal-body" id="print-modal-body">
-                <div style="display:flex;align-items:center;justify-content:center;height:400px;flex-direction:column;gap:20px;color:#6b7280;">
-                    <div style="font-size:48px;">🔄</div>
-                    <div style="font-size:16px;">Memuatkan pralayar...</div>
-                    <div style="font-size:12px;">Sila tunggu sebentar</div>
-                </div>
-            </div>
-            <div class="modal-footer no-print">
-                <button class="btn btn-secondary" id="print-modal-cancel">Tutup</button>
-                <button class="btn btn-primary" id="print-confirm-btn">Cetak Borang</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // ============================================
-        // CONFIG - Sama dengan di atas
-        // ============================================
         const CONFIG = {
             SECRET_KEY: 'PRV_ALT_SAINSPD_2026_SECURE',
             API_URL: 'https://dashboardprvalt.sainspdwater.workers.dev/',
-            GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwlDOBTVNnSPE4EFjXoLbby1C9Si7Km44iU3edAVqDUbEza0A1uYK524AWAAiRJO2YAcg/exec',
+            GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxYkicFTwbjWSXb-jxuGWiENQTQtQBXMJ1pNEQdbHyzawqqdMrLv1DD17rxuIXPSJNU/exec',
             TIMEOUT: 30000,
-            DEBOUNCE_DELAY: 300,
-            CACHE_DURATION: 5 * 60 * 1000
+            DEBOUNCE_DELAY: 300
         };
 
-        // ============================================
-        // API SERVICE
-        // ============================================
         class ApiService {
             constructor() {
                 this.authToken = localStorage.getItem('AUTH_TOKEN') || '';
                 this.userRole = localStorage.getItem('USER_ROLE') || 'USER';
-                this.username = localStorage.getItem('USERNAME') || 'User';
-                this.secretKey = CONFIG.SECRET_KEY;
             }
 
             async request(action, data = {}) {
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), CONFIG.TIMEOUT);
-
-                    const response = await fetch(CONFIG.API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            action: action,
-                            internalSecret: this.secretKey,
-                            authToken: this.authToken,
-                            userRole: this.userRole,
-                            ...data
-                        }),
-                        signal: controller.signal
-                    });
-
-                    clearTimeout(timeoutId);
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
-
-                    const result = await response.json();
-                    if (!result.success) {
-                        throw new Error(result.message || 'Ralat komunikasi pelayan');
-                    }
-                    return result;
-                } catch (error) {
-                    console.error(`API Error [${action}]:`, error);
-                    throw error;
-                }
+                const response = await fetch(CONFIG.API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: action,
+                        internalSecret: CONFIG.SECRET_KEY,
+                        authToken: this.authToken,
+                        userRole: this.userRole,
+                        ...data
+                    })
+                });
+                const result = await response.json();
+                if (!result.success) throw new Error(result.message || 'Ralat komunikasi pelayan');
+                return result;
             }
 
-            async getDashboardData() {
-                return await this.request('getDashboardData');
-            }
-
-            async getFilterOptions() {
-                return await this.request('getFilterOptions');
-            }
-
-            async getRecordBySerialNo(serialNo) {
-                return await this.request('getRecordBySerialNo', { serialNo });
-            }
-
-            async updateRecord(serialNo, recordData) {
-                return await this.request('updateRecord', { serialNo, recordData });
-            }
-
-            isAdmin() {
-                return this.userRole === 'ADMIN';
-            }
+            async getDashboardData() { return await this.request('getDashboardData'); }
+            async getFilterOptions() { return await this.request('getFilterOptions'); }
+            async getRecordBySerialNo(serialNo) { return await this.request('getRecordBySerialNo', { serialNo }); }
+            async updateRecord(serialNo, recordData) { return await this.request('updateRecord', { serialNo, recordData }); }
         }
 
         const api = new ApiService();
 
-        // ============================================
-        // DASHBOARD CONTROLLER
-        // ============================================
         class Dashboard {
             constructor() {
                 this.records = [];
                 this.filterOptions = {};
                 this.filteredRecords = [];
                 this.charts = {};
-                this.filters = {
-                    bulan: '',
-                    personel: '',
-                    jenis: '',
-                    kategori: '',
-                    zon: '',
-                    search: ''
-                };
+                this.filters = { bulan: '', personel: '', jenis: '', kategori: '', zon: '', search: '' };
                 this.init();
             }
 
             async init() {
                 this.bindEvents();
                 this.initTheme();
-                this.showOpeningAnimation();
+                setTimeout(() => document.getElementById('opening-animation').classList.add('hidden'), 2000);
                 this.updateAuthUI();
                 try {
                     await this.loadData();
                     this.initCharts();
                     this.updateDashboard();
                 } catch (error) {
-                    this.showError(error);
+                    this.showToast(error.message, 'error');
                 }
-            }
-
-            showOpeningAnimation() {
-                setTimeout(() => {
-                    const animation = document.getElementById('opening-animation');
-                    if (animation) animation.classList.add('hidden');
-                }, 2000);
             }
 
             initTheme() {
-                const savedTheme = localStorage.getItem('prv-alt-theme') || 'light';
-                if (savedTheme === 'night') {
+                if (localStorage.getItem('prv-alt-theme') === 'night') {
                     document.documentElement.setAttribute('data-theme', 'night');
                 }
-            }
-
-            toggleTheme() {
-                const currentTheme = document.documentElement.getAttribute('data-theme');
-                const newTheme = currentTheme === 'night' ? 'light' : 'night';
-                if (newTheme === 'night') {
-                    document.documentElement.setAttribute('data-theme', 'night');
-                } else {
-                    document.documentElement.removeAttribute('data-theme');
-                }
-                localStorage.setItem('prv-alt-theme', newTheme);
             }
 
             bindEvents() {
                 document.getElementById('tab-rumusan').addEventListener('click', () => this.switchTab('rumusan'));
                 document.getElementById('tab-kemaskini').addEventListener('click', () => this.switchTab('kemaskini'));
                 document.getElementById('refresh-btn').addEventListener('click', () => this.refreshData());
-                document.getElementById('theme-toggle').addEventListener('click', () => this.toggleTheme());
+                document.getElementById('theme-toggle').addEventListener('click', () => {
+                    const night = document.documentElement.getAttribute('data-theme') === 'night';
+                    document.documentElement.setAttribute('data-theme', night ? 'light' : 'night');
+                    localStorage.setItem('prv-alt-theme', night ? 'light' : 'night');
+                });
 
-                document.getElementById('filter-bulan').addEventListener('change', (e) => { this.filters.bulan = e.target.value; this.applyFilters(); });
-                document.getElementById('filter-personel').addEventListener('change', (e) => { this.filters.personel = e.target.value; this.applyFilters(); });
-                document.getElementById('filter-jenis').addEventListener('change', (e) => { this.filters.jenis = e.target.value; this.applyFilters(); });
-                document.getElementById('filter-kategori').addEventListener('change', (e) => { this.filters.kategori = e.target.value; this.applyFilters(); });
-                document.getElementById('filter-zon').addEventListener('change', (e) => { this.filters.zon = e.target.value; this.applyFilters(); });
-                
-                let searchTimeout;
-                document.getElementById('filter-search').addEventListener('input', (e) => {
-                    clearTimeout(searchTimeout);
-                    searchTimeout = setTimeout(() => {
-                        this.filters.search = e.target.value.toLowerCase().trim();
+                ['bulan', 'personel', 'jenis', 'kategori', 'zon'].forEach(id => {
+                    document.getElementById(`filter-${id}`).addEventListener('change', e => {
+                        this.filters[id] = e.target.value;
                         this.applyFilters();
-                    }, CONFIG.DEBOUNCE_DELAY);
+                    });
                 });
 
-                document.getElementById('modal-close').addEventListener('click', () => this.closeUpdateModal());
-                document.getElementById('modal-cancel-btn').addEventListener('click', () => this.closeUpdateModal());
-                document.getElementById('modal-save-btn').addEventListener('click', () => this.handleSaveRecord());
-
-                document.getElementById('modal-pelaksana').addEventListener('change', (e) => {
-                    const lainGroup = document.getElementById('modal-pelaksana-lain-group');
-                    if (e.target.value === 'LAIN-LAIN') {
-                        lainGroup.classList.remove('hidden');
-                    } else {
-                        lainGroup.classList.add('hidden');
-                    }
+                document.getElementById('filter-search').addEventListener('input', e => {
+                    this.filters.search = e.target.value.toLowerCase().trim();
+                    this.applyFilters();
                 });
 
-                document.getElementById('modal-jenis').addEventListener('change', (e) => {
-                    const lainGroup = document.getElementById('modal-jenis-lain-group');
-                    if (e.target.value === 'Lain-lain') {
-                        lainGroup.classList.remove('hidden');
-                    } else {
-                        lainGroup.classList.add('hidden');
-                    }
-                });
-
-                document.getElementById('modal-saiz').addEventListener('change', (e) => {
-                    const lainGroup = document.getElementById('modal-saiz-lain-group');
-                    if (e.target.value === 'Lain-lain') {
-                        lainGroup.classList.remove('hidden');
-                    } else {
-                        lainGroup.classList.add('hidden');
-                    }
-                });
-
-                document.getElementById('print-modal-close').addEventListener('click', () => this.closePrintModal());
-                document.getElementById('print-modal-cancel').addEventListener('click', () => this.closePrintModal());
-                document.getElementById('print-confirm-btn').addEventListener('click', () => this.confirmPrint());
+                document.getElementById('modal-close').addEventListener('click', () => this.closeModal());
+                document.getElementById('modal-cancel-btn').addEventListener('click', () => this.closeModal());
+                document.getElementById('modal-save-btn').addEventListener('click', () => this.saveRecord());
             }
 
-            switchTab(tabName) {
-                document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-                if (tabName === 'rumusan') {
-                    document.getElementById('tab-rumusan').classList.add('active');
-                    document.getElementById('content-rumusan').classList.add('active');
-                } else if (tabName === 'kemaskini') {
-                    document.getElementById('tab-kemaskini').classList.add('active');
-                    document.getElementById('content-kemaskini').classList.add('active');
-                }
-            }
-
-            showTableLoading() {
-                const container = document.querySelector('.table-container');
-                if (container && !document.getElementById('table-overlay')) {
-                    const overlay = document.createElement('div');
-                    overlay.id = 'table-overlay';
-                    overlay.className = 'table-loading-overlay';
-                    overlay.innerHTML = `
-                        <span class="loading-spinner"></span>
-                        <p id="loading-status-text" style="margin-top: 10px;">Mengambil data terkini...</p>
-                    `;
-                    container.appendChild(overlay);
-                }
-            }
-
-            hideTableLoading() {
-                const overlay = document.getElementById('table-overlay');
-                if (overlay) {
-                    overlay.remove();
-                }
+            switchTab(tab) {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById(`tab-${tab}`).classList.add('active');
+                document.getElementById(`content-${tab}`).classList.add('active');
             }
 
             async loadData() {
-                const [dashboardRes, filterRes] = await Promise.all([
+                const [dashRes, filterRes] = await Promise.all([
                     api.getDashboardData(),
                     api.getFilterOptions()
                 ]);
-
-                this.records = dashboardRes.data.records || [];
+                this.records = dashRes.data.records || [];
                 this.filterOptions = filterRes.data || {};
                 this.filteredRecords = [...this.records];
                 
-                if (dashboardRes.data.lastSync) {
-                    this.updateLastSync(dashboardRes.data.lastSync);
+                if (dashRes.data.lastSync) {
+                    document.getElementById('last-updated').textContent = `Last Updated: ${new Date(dashRes.data.lastSync).toLocaleString()}`;
                 }
-
-                this.populateFilterDropdowns();
+                this.populateDropdowns();
             }
 
             async refreshData() {
-                const btn = document.getElementById('refresh-btn');
-                btn.disabled = true;
-                btn.innerHTML = `<span class="loading-spinner"></span> Memuat...`;
-                
-                this.showTableLoading();
-
-                try {
-                    await this.loadData();
-                    this.updateCharts();
-                    this.updateDashboard();
-                    this.showToast('Data berjaya dikemaskini', 'success');
-                } catch (error) {
-                    this.showToast('Gagal memuat semula data', 'error');
-                } finally {
-                    this.hideTableLoading();
-                    btn.disabled = false;
-                    btn.innerHTML = `<svg class="icon" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg> Muat Semula`;
-                }
+                await this.loadData();
+                this.updateDashboard();
+                this.showToast('Data berjaya dikemaskini', 'success');
             }
 
-            populateFilterDropdowns() {
-                const populateSelect = (id, options, defaultText) => {
-                    const select = document.getElementById(id);
-                    if (!select) return;
-                    const currentVal = select.value;
-                    select.innerHTML = `<option value="">${defaultText}</option>`;
-                    if (options && Array.isArray(options)) {
-                        options.forEach(opt => {
-                            const option = document.createElement('option');
-                            option.value = opt;
-                            option.textContent = opt;
-                            select.appendChild(option);
-                        });
-                    }
-                    select.value = currentVal;
+            populateDropdowns() {
+                const pop = (id, list) => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    const val = el.value;
+                    el.innerHTML = `<option value="">Semua</option>` + (list || []).map(i => `<option value="${i}">${i}</option>`).join('');
+                    el.value = val;
                 };
-
-                populateSelect('filter-bulan', this.filterOptions.bulans || [], 'Semua Bulan');
-                populateSelect('filter-personel', this.filterOptions.personels || [], 'Semua Pelaksana');
-                populateSelect('filter-jenis', this.filterOptions.jenisPenyelenggaraan || [], 'Semua Jenis');
-                populateSelect('filter-kategori', this.filterOptions.kategoriPenyelenggaraan || [], 'Semua Kategori');
-                
-                const zonList = ['1', '2'];
-                populateSelect('filter-zon', zonList, 'Semua Zon');
+                pop('filter-bulan', this.filterOptions.bulans);
+                pop('filter-personel', this.filterOptions.personels);
+                pop('filter-jenis', this.filterOptions.jenisPenyelenggaraan);
+                pop('filter-kategori', this.filterOptions.kategoriPenyelenggaraan);
+                pop('filter-zon', ['1', '2']);
             }
 
             applyFilters() {
-                this.filteredRecords = this.records.filter(record => {
-                    if (this.filters.bulan && record.bulan !== this.filters.bulan) return false;
-                    if (this.filters.personel && record.dilaksanakanOleh !== this.filters.personel) return false;
-                    if (this.filters.jenis && record.jenisPenyelenggaraan !== this.filters.jenis) return false;
-                    if (this.filters.kategori && record.kategoriPenyelenggaraan !== this.filters.kategori) return false;
-                    if (this.filters.zon && record.zon !== this.filters.zon) return false;
-                    
+                this.filteredRecords = this.records.filter(r => {
+                    if (this.filters.bulan && r.bulan !== this.filters.bulan) return false;
+                    if (this.filters.personel && r.dilaksanakanOleh !== this.filters.personel) return false;
+                    if (this.filters.jenis && r.jenisPenyelenggaraan !== this.filters.jenis) return false;
+                    if (this.filters.kategori && r.kategoriPenyelenggaraan !== this.filters.kategori) return false;
+                    if (this.filters.zon && r.zon !== this.filters.zon) return false;
                     if (this.filters.search) {
-                        const searchStr = this.filters.search;
-                        const matchSerial = (record.serialNo || '').toLowerCase().includes(searchStr);
-                        const matchLokasi = (record.lokasi || '').toLowerCase().includes(searchStr);
-                        const matchPelaksana = (record.dilaksanakanOleh || '').toLowerCase().includes(searchStr);
-                        if (!matchSerial && !matchLokasi && !matchPelaksana) return false;
+                        const s = this.filters.search;
+                        if (!r.serialNo.toLowerCase().includes(s) && !r.lokasi.toLowerCase().includes(s)) return false;
                     }
                     return true;
                 });
-
                 this.updateTable();
             }
 
@@ -1490,350 +1097,155 @@
             }
 
             updateKPIs() {
-                const total = this.records.length;
-                const prvCount = this.records.filter(r => r.jenisPenyelenggaraan === 'PRV').length;
-                const altCount = this.records.filter(r => r.jenisPenyelenggaraan === 'ALTITUDE').length;
-                const berjadualCount = this.records.filter(r => r.kategoriPenyelenggaraan === 'BERJADUAL').length;
-                const tidakBerjadualCount = this.records.filter(r => r.kategoriPenyelenggaraan === 'TIDAK BERJADUAL').length;
+                const t = this.records.length;
+                const prv = this.records.filter(r => r.jenisPenyelenggaraan === 'PRV').length;
+                const alt = this.records.filter(r => r.jenisPenyelenggaraan === 'ALTITUDE').length;
+                const b = this.records.filter(r => r.kategoriPenyelenggaraan === 'BERJADUAL').length;
+                const tb = this.records.filter(r => r.kategoriPenyelenggaraan === 'TIDAK BERJADUAL').length;
 
-                const kpiGrid = document.getElementById('kpi-grid');
-                kpiGrid.innerHTML = `
-                    <div class="kpi-card">
-                        <div class="kpi-icon">📋</div>
-                        <div class="kpi-value">${total}</div>
-                        <div class="kpi-label">JUMLAH REKOD</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-icon">⚙️</div>
-                        <div class="kpi-value">${prvCount}</div>
-                        <div class="kpi-label">PRV</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-icon">⛰️</div>
-                        <div class="kpi-value">${altCount}</div>
-                        <div class="kpi-label">ALTITUDE</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-icon">📅</div>
-                        <div class="kpi-value">${berjadualCount}</div>
-                        <div class="kpi-label">BERJADUAL</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-icon">🚨</div>
-                        <div class="kpi-value">${tidakBerjadualCount}</div>
-                        <div class="kpi-label">TIDAK BERJADUAL</div>
-                    </div>
+                document.getElementById('kpi-grid').innerHTML = `
+                    <div class="kpi-card"><div class="kpi-value">${t}</div><div class="kpi-label">JUMLAH</div></div>
+                    <div class="kpi-card"><div class="kpi-value">${prv}</div><div class="kpi-label">PRV</div></div>
+                    <div class="kpi-card"><div class="kpi-value">${alt}</div><div class="kpi-label">ALTITUDE</div></div>
+                    <div class="kpi-card"><div class="kpi-value">${b}</div><div class="kpi-label">BERJADUAL</div></div>
+                    <div class="kpi-card"><div class="kpi-value">${tb}</div><div class="kpi-label">TIDAK BERJADUAL</div></div>
                 `;
             }
 
             initCharts() {
-                const chartConfigs = [
-                    { id: 'chart-bulan', type: 'bar', label: 'Jumlah' },
-                    { id: 'chart-jenis', type: 'doughnut', label: 'Jumlah' },
-                    { id: 'chart-kategori', type: 'pie', label: 'Jumlah' },
-                    { id: 'chart-zon', type: 'bar', label: 'Jumlah' },
-                    { id: 'chart-personel', type: 'bar', label: 'Jumlah' }
-                ];
-
-                chartConfigs.forEach(config => {
-                    const ctx = document.getElementById(config.id).getContext('2d');
-                    this.charts[config.id] = new Chart(ctx, {
-                        type: config.type,
-                        data: { labels: [], datasets: [{ label: config.label, data: [], backgroundColor: ['#006994', '#00b3b3', '#008080', '#f59e0b', '#3b82f6', '#10b981', '#dc2626'] }] },
-                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: config.type !== 'bar' } } }
+                ['bulan', 'jenis', 'kategori', 'zon', 'personel'].forEach(type => {
+                    const ctx = document.getElementById(`chart-${type}`).getContext('2d');
+                    this.charts[type] = new Chart(ctx, {
+                        type: type === 'jenis' ? 'doughnut' : type === 'kategori' ? 'pie' : 'bar',
+                        data: { labels: [], datasets: [{ data: [], backgroundColor: ['#006994', '#00b3b3', '#008080', '#f59e0b', '#3b82f6', '#10b981'] }] },
+                        options: { responsive: true, maintainAspectRatio: false }
                     });
                 });
-
-                this.updateCharts();
             }
 
             updateCharts() {
-                const bulanCounts = {};
-                this.records.forEach(r => { if (r.bulan) bulanCounts[r.bulan] = (bulanCounts[r.bulan] || 0) + 1; });
-                this.updateChartData('chart-bulan', Object.keys(bulanCounts), Object.values(bulanCounts));
-
-                const jenisCounts = {};
-                this.records.forEach(r => { if (r.jenisPenyelenggaraan) jenisCounts[r.jenisPenyelenggaraan] = (jenisCounts[r.jenisPenyelenggaraan] || 0) + 1; });
-                this.updateChartData('chart-jenis', Object.keys(jenisCounts), Object.values(jenisCounts));
-
-                const katCounts = {};
-                this.records.forEach(r => { if (r.kategoriPenyelenggaraan) katCounts[r.kategoriPenyelenggaraan] = (katCounts[r.kategoriPenyelenggaraan] || 0) + 1; });
-                this.updateChartData('chart-kategori', Object.keys(katCounts), Object.values(katCounts));
-
-                const zonCounts = {};
-                this.records.forEach(r => { if (r.zon) zonCounts[r.zon] = (zonCounts[r.zon] || 0) + 1; });
-                this.updateChartData('chart-zon', Object.keys(zonCounts), Object.values(zonCounts));
-
-                const personelCounts = {};
-                this.records.forEach(r => { if (r.dilaksanakanOleh) personelCounts[r.dilaksanakanOleh] = (personelCounts[r.dilaksanakanOleh] || 0) + 1; });
-                this.updateChartData('chart-personel', Object.keys(personelCounts), Object.values(personelCounts));
-            }
-
-            updateChartData(chartId, labels, data) {
-                const chart = this.charts[chartId];
-                if (!chart) return;
-                chart.data.labels = labels;
-                chart.data.datasets[0].data = data;
-                chart.update();
+                const count = (key) => {
+                    const map = {};
+                    this.records.forEach(r => { if (r[key]) map[r[key]] = (map[r[key]] || 0) + 1; });
+                    return map;
+                };
+                const update = (type, map) => {
+                    this.charts[type].data.labels = Object.keys(map);
+                    this.charts[type].data.datasets[0].data = Object.values(map);
+                    this.charts[type].update();
+                };
+                update('bulan', count('bulan'));
+                update('jenis', count('jenisPenyelenggaraan'));
+                update('kategori', count('kategoriPenyelenggaraan'));
+                update('zon', count('zon'));
+                update('personel', count('dilaksanakanOleh'));
             }
 
             updateTable() {
-                const records = this.filteredRecords;
-                const tableBody = document.getElementById('table-body');
+                const tbody = document.getElementById('table-body');
                 const emptyState = document.getElementById('empty-state');
-                const tableContainer = document.querySelector('.table-container');
-
-                if (records.length === 0) {
-                    tableBody.innerHTML = '';
+                
+                if (this.filteredRecords.length === 0) {
+                    tbody.innerHTML = '';
                     emptyState.classList.remove('hidden');
-                    tableContainer.style.display = 'none';
                     return;
                 }
-
                 emptyState.classList.add('hidden');
-                tableContainer.style.display = 'block';
 
-                tableBody.innerHTML = records.map(record => `
+                tbody.innerHTML = this.filteredRecords.map(r => `
                     <tr>
-                        <td><strong>${this.escapeHtml(record.serialNo)}</strong></td>
-                        <td>${this.escapeHtml(record.tarikh)}</td>
-                        <td>${this.escapeHtml(record.masaMula)}</td>
-                        <td>${this.escapeHtml(record.masaSiap)}</td>
-                        <td>${this.escapeHtml(record.dilaksanakanOleh)}</td>
-                        <td>${this.escapeHtml(record.lokasi)}</td>
-                        <td>${this.escapeHtml(record.jenisPenyelenggaraan)}</td>
-                        <td>${this.escapeHtml(record.saiz)}</td>
-                        <td>${this.escapeHtml(record.kategoriPenyelenggaraan)}</td>
-                        <td>${this.escapeHtml(record.zon)}</td>
+                        <td><strong>${r.serialNo}</strong></td>
+                        <td>${r.tarikh}</td>
+                        <td>${r.masaMula}</td>
+                        <td>${r.masaSiap}</td>
+                        <td>${r.dilaksanakanOleh}</td>
+                        <td>${r.lokasi}</td>
+                        <td>${r.jenisPenyelenggaraan}</td>
+                        <td>${r.saiz}</td>
+                        <td>${r.kategoriPenyelenggaraan}</td>
+                        <td>${r.zon}</td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn-action btn-update" onclick="dashboard.openUpdateModal('${record.serialNo}')">Kemaskini</button>
-                                <button class="btn-action btn-print" onclick="printManager.openPrintPreview('${record.serialNo}')">Cetak</button>
+                                <button class="btn-action btn-update" onclick="dashboard.openModal('${r.serialNo}')">Kemaskini</button>
+                                <button class="btn-action btn-print" onclick="window.open('${CONFIG.GOOGLE_SCRIPT_URL}?serialNo=${r.serialNo}&action=view', '_blank')">Cetak</button>
                             </div>
                         </td>
                     </tr>
                 `).join('');
             }
 
-            async openUpdateModal(serialNo) {
-                try {
-                    const res = await api.getRecordBySerialNo(serialNo);
-                    const record = res.data.record;
+            async openModal(serialNo) {
+                const res = await api.getRecordBySerialNo(serialNo);
+                const r = res.data.record;
+                document.getElementById('serial-no').value = r.serialNo;
+                document.getElementById('modal-tarikh').value = r.tarikh.split('/').reverse().join('-');
+                document.getElementById('modal-masa-mula').value = r.masaMula;
+                document.getElementById('modal-masa-siap').value = r.masaSiap;
+                document.getElementById('modal-lokasi').value = r.lokasi;
+                document.getElementById('modal-tindakan').value = r.tindakanUlasan;
 
-                    document.getElementById('serial-no').value = record.serialNo || '';
-                    document.getElementById('modal-tarikh').value = this.formatDateForInput(record.tarikh);
-                    document.getElementById('modal-masa-mula').value = record.masaMula || '';
-                    document.getElementById('modal-masa-siap').value = record.masaSiap || '';
-                    document.getElementById('modal-lokasi').value = record.lokasi || '';
-                    document.getElementById('modal-tindakan').value = record.tindakanUlasan || '';
+                const pSel = document.getElementById('modal-pelaksana');
+                pSel.innerHTML = (this.filterOptions.personels || []).map(p => `<option value="${p}">${p}</option>`).join('');
+                pSel.value = r.dilaksanakanOleh;
 
-                    this.populateModalDropdowns(record);
-                    document.getElementById('update-modal').classList.remove('hidden');
-                } catch (error) {
-                    this.showToast('Gagal memuatkan rekod untuk dikemaskini', 'error');
-                }
+                const sSel = document.getElementById('modal-saiz');
+                sSel.innerHTML = (this.filterOptions.saizList || ['DN100', 'DN150']).map(s => `<option value="${s}">${s}</option>`).join('');
+                sSel.value = r.saiz;
+
+                document.getElementById('modal-jenis').value = r.jenisPenyelenggaraan;
+                document.getElementById('modal-kategori').value = r.kategoriPenyelenggaraan;
+                document.getElementById('modal-zon').value = r.zon;
+
+                document.getElementById('update-modal').classList.remove('hidden');
             }
 
-            populateModalDropdowns(record) {
-                const pelaksanaSelect = document.getElementById('modal-pelaksana');
-                const personels = this.filterOptions.personels || [];
-                pelaksanaSelect.innerHTML = personels.map(p => `<option value="${p}">${p}</option>`).join('') + '<option value="LAIN-LAIN">LAIN-LAIN</option>';
-                
-                if (personels.includes(record.dilaksanakanOleh)) {
-                    pelaksanaSelect.value = record.dilaksanakanOleh;
-                    document.getElementById('modal-pelaksana-lain-group').classList.add('hidden');
-                } else if (record.dilaksanakanOleh) {
-                    pelaksanaSelect.value = 'LAIN-LAIN';
-                    document.getElementById('modal-pelaksana-lain-group').classList.remove('hidden');
-                    document.getElementById('modal-pelaksana-lain').value = record.dilaksanakanOleh;
-                }
-
-                const jenisSelect = document.getElementById('modal-jenis');
-                const jenisList = this.filterOptions.jenisPenyelenggaraan || ['PRV', 'ALTITUDE', 'Lain-lain'];
-                jenisSelect.innerHTML = jenisList.map(j => `<option value="${j}">${j}</option>`).join('');
-                if (jenisList.includes(record.jenisPenyelenggaraan)) {
-                    jenisSelect.value = record.jenisPenyelenggaraan;
-                    document.getElementById('modal-jenis-lain-group').classList.add('hidden');
-                } else {
-                    jenisSelect.value = 'Lain-lain';
-                    document.getElementById('modal-jenis-lain-group').classList.remove('hidden');
-                    document.getElementById('modal-jenis-lain').value = record.jenisPenyelenggaraan;
-                }
-
-                const saizSelect = document.getElementById('modal-saiz');
-                const saizList = this.filterOptions.saizList || ['DN100', 'DN150'];
-                saizSelect.innerHTML = saizList.map(s => `<option value="${s}">${s}</option>`).join('') + '<option value="Lain-lain">Lain-lain</option>';
-                if (saizList.includes(record.saiz)) {
-                    saizSelect.value = record.saiz;
-                    document.getElementById('modal-saiz-lain-group').classList.add('hidden');
-                } else {
-                    saizSelect.value = 'Lain-lain';
-                    document.getElementById('modal-saiz-lain-group').classList.remove('hidden');
-                    document.getElementById('modal-saiz-lain').value = record.saiz;
-                }
-
-                document.getElementById('modal-kategori').value = record.kategoriPenyelenggaraan || 'BERJADUAL';
-
-                const zonSelect = document.getElementById('modal-zon');
-                zonSelect.innerHTML = `<option value="1">Zon 1</option><option value="2">Zon 2</option>`;
-                zonSelect.value = record.zon || '1';
-            }
-
-            closeUpdateModal() {
+            closeModal() {
                 document.getElementById('update-modal').classList.add('hidden');
             }
 
-            formatDateForInput(dateStr) {
-                if (!dateStr) return '';
-                const parts = dateStr.split('/');
-                if (parts.length === 3) {
-                    return `${parts[2]}-${parts[1]}-${parts[0]}`;
-                }
-                return dateStr;
-            }
-
-            async handleSaveRecord() {
+            async saveRecord() {
                 const serialNo = document.getElementById('serial-no').value;
-                const recordData = {
+                const data = {
                     tarikh: document.getElementById('modal-tarikh').value,
                     masaMula: document.getElementById('modal-masa-mula').value,
                     masaSiap: document.getElementById('modal-masa-siap').value,
                     dilaksanakanOleh: document.getElementById('modal-pelaksana').value,
-                    dilaksanakanOlehLain: document.getElementById('modal-pelaksana-lain').value,
                     lokasi: document.getElementById('modal-lokasi').value,
                     jenisPenyelenggaraan: document.getElementById('modal-jenis').value,
-                    jenisLain: document.getElementById('modal-jenis-lain').value,
                     saiz: document.getElementById('modal-saiz').value,
-                    saizLain: document.getElementById('modal-saiz-lain').value,
                     kategoriPenyelenggaraan: document.getElementById('modal-kategori').value,
                     zon: document.getElementById('modal-zon').value,
                     tindakanUlasan: document.getElementById('modal-tindakan').value
                 };
-
-                const saveBtn = document.getElementById('modal-save-btn');
-                saveBtn.disabled = true;
-                saveBtn.innerHTML = `<span class="loading-spinner"></span> Menyimpan...`;
-
                 try {
-                    await api.updateRecord(serialNo, recordData);
+                    await api.updateRecord(serialNo, data);
                     this.showToast('Rekod berjaya dikemaskini', 'success');
-                    this.closeUpdateModal();
+                    this.closeModal();
                     await this.loadData();
                     this.updateDashboard();
-                } catch (error) {
-                    this.showToast(error.message || 'Gagal mengemaskini rekod', 'error');
-                } finally {
-                    saveBtn.disabled = false;
-                    saveBtn.textContent = 'Simpan Perubahan';
-                }
-            }
-
-            closePrintModal() {
-                document.getElementById('print-preview-modal').classList.add('hidden');
-            }
-
-            confirmPrint() {
-                const printContent = document.getElementById('print-modal-body').innerHTML;
-                const printWindow = window.open('', '_blank', 'width=800,height=600');
-                if (printWindow) {
-                    printWindow.document.write(`
-                        <html><head><title>Cetakan PRV & ALT</title>
-                        <style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;}td,th{border:1px solid #ddd;padding:8px;text-align:left;}th{background:#006994;color:white;}
-</style></head>
-<body>${printContent}</body></html>
-`);
-                    printWindow.document.close();
-                    printWindow.print();
+                } catch (e) {
+                    this.showToast(e.message, 'error');
                 }
             }
 
             updateAuthUI() {
-                const username = localStorage.getItem('USERNAME') || 'Pengguna';
+                document.getElementById('username-display').textContent = localStorage.getItem('USERNAME') || 'User';
                 const role = localStorage.getItem('USER_ROLE') || 'USER';
-
-                const userDisplay = document.getElementById('username-display');
-                const roleDisplay = document.getElementById('role-badge-display');
-
-                if (userDisplay) userDisplay.textContent = username;
-                if (roleDisplay) {
-                    roleDisplay.textContent = role;
-                    if (role.toUpperCase().includes('ADMIN')) {
-                        roleDisplay.classList.add('admin');
-                    } else {
-                        roleDisplay.classList.add('user');
-                    }
-                }
+                const badge = document.getElementById('role-badge-display');
+                badge.textContent = role;
+                if (role.includes('ADMIN')) badge.classList.add('admin');
             }
 
-            updateLastSync(isoString) {
-                const date = new Date(isoString);
-                const formatted = date.toLocaleString('ms-MY', {
-                    day: '2-digit', month: '2-digit', year: 'numeric',
-                    hour: '2-digit', minute: '2-digit', second: '2-digit'
-                });
-                document.getElementById('last-updated').textContent = `Last Updated: ${formatted}`;
-            }
-
-            escapeHtml(str) {
-                if (!str) return '';
-                return String(str)
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#039;');
-            }
-
-            showToast(message, type = 'success') {
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                toast.textContent = message;
-                document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 3000);
-            }
-
-            showError(error) {
-                this.showToast(error.message || 'Ralat sistem berlaku', 'error');
+            showToast(msg, type = 'success') {
+                const t = document.createElement('div');
+                t.className = `toast ${type}`;
+                t.textContent = msg;
+                document.body.appendChild(t);
+                setTimeout(() => t.remove(), 3000);
             }
         }
 
-        // ============================================
-        // PRINT MANAGER
-        // ============================================
-        class PrintManager {
-            constructor() {}
-
-            async openPrintPreview(serialNo) {
-                try {
-                    const scriptUrl = CONFIG.GOOGLE_SCRIPT_URL;
-                    const url = scriptUrl + '?serialNo=' + encodeURIComponent(serialNo) + '&action=view';
-                    
-                    const printWindow = window.open(url, '_blank');
-                    
-                    if (printWindow) {
-                        setTimeout(() => {
-                            if (!printWindow.closed) {
-                                printWindow.close();
-                            }
-                        }, 15000);
-                    }
-                    
-                } catch (error) {
-                    alert('Gagal membuka pralayar: ' + error.message);
-                }
-            }
-        }
-
-        // ============================================
-        // INITIALIZATION
-        // ============================================
         const dashboard = new Dashboard();
-        const printManager = new PrintManager();
-
-        console.log('✅ PRV & ALT Dashboard initialized (Secure Version)');
-        console.log('📡 API URL:', CONFIG.API_URL);
-        console.log('🖨️ Google Script URL:', CONFIG.GOOGLE_SCRIPT_URL);
-        console.log('🔑 Secret Key:', CONFIG.SECRET_KEY ? '***SET***' : '❌ MISSING!');
     </script>
 </body>
 </html>
