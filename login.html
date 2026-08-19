@@ -25,9 +25,6 @@
             position: relative;
         }
 
-        /* ==========================================
-           LATAR BELAKANG SINEMATIK PAIP AIR (CANVAS)
-           ========================================== */
         #pipelineCanvas {
             position: fixed;
             inset: 0;
@@ -47,7 +44,6 @@
             background: 
                 radial-gradient(ellipse at 65% 40%, rgba(0, 20, 40, 0.4) 0%, rgba(0, 5, 10, 0.6) 70%),
                 linear-gradient(180deg, rgba(0, 15, 30, 0.5) 0%, rgba(0, 5, 12, 0.7) 100%);
-            mix-blend-mode: normal;
         }
 
         .vignette {
@@ -58,9 +54,6 @@
             background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.4) 100%);
         }
 
-        /* ==========================================
-           KAD LOGIN
-           ========================================== */
         .water-auth-card {
             position: relative;
             z-index: 10;
@@ -76,24 +69,13 @@
                 0 0 40px rgba(0, 120, 200, 0.2);
             padding: 2.8rem 2.2rem 2.2rem 2.2rem;
             border: 1px solid rgba(120, 210, 255, 0.2);
-            transition: opacity 0.5s ease, transform 0.2s ease, box-shadow 0.3s;
             animation: slideFromRight 0.9s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-            will-change: transform, opacity;
         }
 
         @keyframes slideFromRight {
-            0% {
-                transform: translateX(120%);
-                opacity: 0;
-            }
-            60% {
-                transform: translateX(-5%);
-                opacity: 1;
-            }
-            100% {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            0% { transform: translateX(120%); opacity: 0; }
+            60% { transform: translateX(-5%); opacity: 1; }
+            100% { transform: translateX(0); opacity: 1; }
         }
 
         .fade-to-black {
@@ -101,21 +83,9 @@
         }
 
         @keyframes fadeBlack {
-            0% {
-                opacity: 1;
-                filter: brightness(1);
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.7;
-                filter: brightness(0.8);
-                transform: scale(0.99);
-            }
-            100% {
-                opacity: 0;
-                filter: brightness(0);
-                transform: scale(0.98);
-            }
+            0% { opacity: 1; filter: brightness(1); transform: scale(1); }
+            50% { opacity: 0.7; filter: brightness(0.8); transform: scale(0.99); }
+            100% { opacity: 0; filter: brightness(0); transform: scale(0.98); }
         }
 
         .vibrate-fail {
@@ -154,7 +124,6 @@
             transform: rotate(-45deg);
             font-size: 2rem;
             color: white;
-            text-shadow: 0 2px 10px #004466;
             font-style: normal;
             font-weight: bold;
             line-height: 1;
@@ -164,7 +133,6 @@
         h2 {
             text-align: center;
             font-weight: 600;
-            letter-spacing: 0.5px;
             color: #b8e6ff;
             margin-bottom: 0.2rem;
             font-size: 1.7rem;
@@ -194,7 +162,6 @@
             font-weight: 500;
             margin-bottom: 0.5rem;
             color: #9ac9e0;
-            letter-spacing: 0.3px;
             font-size: 0.9rem;
         }
 
@@ -210,22 +177,14 @@
             border: 2px solid rgba(100, 180, 220, 0.4);
             border-radius: 30px;
             background: rgba(0, 20, 35, 0.7);
-            backdrop-filter: blur(4px);
             font-size: 1rem;
             outline: none;
-            transition: all 0.25s;
             color: #e0f0fa;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        input::placeholder {
-            color: #6a8fa0;
         }
 
         input:focus {
             border-color: #4db8e8;
             background: rgba(0, 30, 50, 0.85);
-            box-shadow: 0 0 0 4px rgba(77, 184, 232, 0.15);
         }
 
         .show-password-btn {
@@ -235,22 +194,11 @@
             border: none;
             cursor: pointer;
             color: #8ab8cc;
-            font-size: 1.1rem;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 4px;
-            border-radius: 50%;
-            transition: all 0.2s;
-            opacity: 0.7;
-            width: 32px;
-            height: 32px;
-        }
-
-        .show-password-btn:hover {
-            background: rgba(100, 180, 220, 0.2);
-            opacity: 1;
-            color: #c8e8ff;
         }
 
         .show-password-btn svg {
@@ -274,28 +222,13 @@
             color: white;
             letter-spacing: 1.5px;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 10px 25px -5px rgba(0, 80, 130, 0.5);
-            margin-top: 0.5rem;
-            border: 1px solid rgba(150, 210, 245, 0.3);
             text-transform: uppercase;
+            border: 1px solid rgba(150, 210, 245, 0.3);
+            margin-top: 0.5rem;
         }
 
         .login-btn:hover {
             background: linear-gradient(135deg, #0e86b8, #0d5c82);
-            transform: translateY(-2px);
-            box-shadow: 0 18px 30px -8px #001a2e;
-        }
-
-        .login-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 5px 15px #001a2e;
-        }
-
-        .login-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
         }
 
         .message-area {
@@ -303,22 +236,12 @@
             margin-top: 1.4rem;
             min-height: 28px;
             font-weight: 500;
-            color: #ff9e9e;
-            transition: 0.3s;
             font-size: 0.9rem;
         }
 
-        .message-area.loading {
-            color: #ffcc00;
-        }
-
-        .message-area.success {
-            color: #7fd4a8;
-        }
-
-        .message-area.error {
-            color: #ff9e9e;
-        }
+        .message-area.loading { color: #ffcc00; }
+        .message-area.success { color: #7fd4a8; }
+        .message-area.error { color: #ff9e9e; }
 
         .info-bubbles {
             display: flex;
@@ -327,18 +250,6 @@
             margin-top: 1rem;
             font-size: 0.75rem;
             color: #6a9ab0;
-            flex-wrap: wrap;
-            letter-spacing: 0.5px;
-        }
-
-        @media (max-width: 450px) {
-            .water-auth-card {
-                padding: 2rem 1.5rem;
-                border-radius: 2rem;
-            }
-            h2 {
-                font-size: 1.4rem;
-            }
         }
     </style>
 </head>
@@ -350,9 +261,7 @@
 
     <div class="water-auth-card" id="authCard">
         <div class="water-icon">
-            <div class="water-drop-symbol">
-                <i>💧</i>
-            </div>
+            <div class="water-drop-symbol"><i>💧</i></div>
         </div>
         <h2>Dashboard PRV & Alt</h2>
         <div class="sub-location">Port Dickson</div>
@@ -368,7 +277,7 @@
             <label for="password">Kata Laluan</label>
             <div class="input-wrapper">
                 <input type="password" id="password" placeholder="••••••••" autocomplete="off" value="sainspd">
-                <button class="show-password-btn" id="togglePasswordBtn" type="button" title="Tunjuk/sembunyi kata laluan">
+                <button class="show-password-btn" id="togglePasswordBtn" type="button">
                     <svg id="eyeIcon" viewBox="0 0 24 24">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                         <circle cx="12" cy="12" r="3"></circle>
@@ -378,8 +287,8 @@
         </div>
 
         <button class="login-btn" id="loginButton">Log Masuk</button>
-
         <div class="message-area" id="messageBox"></div>
+
         <div class="info-bubbles">
             <span>💧 Milik SAINSPD</span>
             <span>🔒 Encrypted</span>
@@ -388,28 +297,14 @@
 
     <script>
         (function() {
-            // ============================================
-            // CONFIGURATION - Kemaskini di sini sahaja!
-            // ============================================
             const CONFIG = {
-                // 🔐 SECRET KEY - Dapatkan dari GAS setup() log
-                // Jalankan setup() di GAS dan salin key dari log
                 SECRET_KEY: 'PRV_ALT_SAINSPD_2026_SECURE',
-                
-                // 🌐 API URL - Cloudflare Worker URL
                 API_URL: 'https://dashboardprvalt.sainspdwater.workers.dev/',
-                
-                // ⏱️ Retry settings
                 MAX_RETRY: 3,
                 RETRY_DELAY: 2000,
-                
-                // ⏱️ Timeout settings
                 TIMEOUT: 30000
             };
 
-            // ============================================
-            // DOM ELEMENTS
-            // ============================================
             const authCard = document.getElementById('authCard');
             const usernameInput = document.getElementById('username');
             const passwordInput = document.getElementById('password');
@@ -418,30 +313,17 @@
             const messageBox = document.getElementById('messageBox');
             const eyeIcon = document.getElementById('eyeIcon');
 
-            // ============================================
-            // TOGGLE PASSWORD VISIBILITY
-            // ============================================
             toggleBtn.addEventListener('click', function() {
                 const type = passwordInput.getAttribute('type');
                 if (type === 'password') {
                     passwordInput.setAttribute('type', 'text');
-                    eyeIcon.innerHTML = `
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"></path>
-                        <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"></path>
-                        <line x1="1" y1="1" x2="23" y2="23"></line>
-                    `;
+                    eyeIcon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"></path><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
                 } else {
                     passwordInput.setAttribute('type', 'password');
-                    eyeIcon.innerHTML = `
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                    `;
+                    eyeIcon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
                 }
             });
 
-            // ============================================
-            // UI HELPERS
-            // ============================================
             function setMessage(text, type = 'error') {
                 messageBox.textContent = text;
                 messageBox.className = 'message-area ' + type;
@@ -451,21 +333,17 @@
                 authCard.classList.remove('fade-to-black', 'vibrate-fail');
                 void authCard.offsetWidth;
                 authCard.classList.add('vibrate-fail');
-                setTimeout(() => {
-                    authCard.classList.remove('vibrate-fail');
-                }, 500);
+                setTimeout(() => authCard.classList.remove('vibrate-fail'), 500);
             }
 
             function triggerFadeToBlack() {
-                authCard.classList.remove('vibrate-fail');
-                void authCard.offsetWidth;
                 authCard.classList.add('fade-to-black');
             }
 
             function setLoading(isLoading) {
                 if (isLoading) {
                     loginBtn.disabled = true;
-                    loginBtn.innerHTML = '<span class="loading-spinner"></span> MENGESAHKAN...';
+                    loginBtn.innerHTML = 'MENGESAHKAN...';
                     setMessage('⏳ Sila tunggu...', 'loading');
                 } else {
                     loginBtn.disabled = false;
@@ -473,9 +351,6 @@
                 }
             }
 
-            // ============================================
-            // LOGIN FUNCTION WITH RETRY
-            // ============================================
             function attemptLogin(username, hashedPassword, retryCount = 0) {
                 const payload = {
                     action: 'authenticate',
@@ -484,135 +359,71 @@
                     password: hashedPassword
                 };
 
-                console.log('📤 Sending login request...');
-
-                // Create timeout promise
                 const timeoutPromise = new Promise((_, reject) => {
                     setTimeout(() => reject(new Error('Request timeout')), CONFIG.TIMEOUT);
                 });
 
-                // Create fetch promise
                 const fetchPromise = fetch(CONFIG.API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
-                // Race between fetch and timeout
                 return Promise.race([fetchPromise, timeoutPromise])
                     .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                        }
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
                         return response.json();
                     })
                     .then(data => {
-                        console.log('📨 Response received:', data);
-                        
-                        if (data.success) {
-                            return { success: true, data: data.data };
-                        } else {
-                            throw new Error(data.message || 'Authentication failed');
-                        }
+                        if (data.success) return { success: true, data: data.data };
+                        throw new Error(data.message || 'Authentication failed');
                     })
                     .catch(error => {
-                        console.error('❌ Attempt ' + (retryCount + 1) + ' failed:', error.message);
-                        
-                        // Retry logic
                         if (retryCount < CONFIG.MAX_RETRY - 1) {
-                            const nextRetry = retryCount + 1;
-                            setMessage(`⏳ Cubaan ${nextRetry}/${CONFIG.MAX_RETRY}...`, 'loading');
-                            console.log(`🔄 Retry ${nextRetry}/${CONFIG.MAX_RETRY} in ${CONFIG.RETRY_DELAY}ms`);
-                            
-                            return new Promise((resolve) => {
-                                setTimeout(() => {
-                                    resolve(attemptLogin(username, hashedPassword, nextRetry));
-                                }, CONFIG.RETRY_DELAY);
-                            });
+                            return new Promise(resolve => setTimeout(() => resolve(attemptLogin(username, hashedPassword, retryCount + 1)), CONFIG.RETRY_DELAY));
                         }
-                        
-                        // Max retries reached
                         throw error;
                     });
             }
 
-            // ============================================
-            // LOGIN BUTTON CLICK HANDLER
-            // ============================================
             loginBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-                
                 const username = usernameInput.value.trim();
                 const password = passwordInput.value.trim();
                 
-                // Reset message
-                setMessage('');
-                
-                // Validate input
-                if (username === '' || password === '') {
+                if (!username || !password) {
                     setMessage('⚠️ Sila isi ID dan kata laluan.', 'error');
                     triggerVibrate();
                     return;
                 }
 
-                // Show loading state
                 setLoading(true);
-
-                // Hash password
                 const hashedPassword = CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
-                console.log('🔐 Password hashed');
 
-                // Attempt login with retry
                 attemptLogin(username, hashedPassword)
                     .then(result => {
                         setLoading(false);
+                        setMessage('✅ Log masuk berjaya!', 'success');
+                        localStorage.setItem('AUTH_TOKEN', result.data.token);
+                        localStorage.setItem('USER_ROLE', result.data.role);
+                        localStorage.setItem('USERNAME', result.data.username);
+                        localStorage.setItem('LOGIN_TIMESTAMP', new Date().getTime());
                         
-                        if (result.success) {
-                            setMessage('✅ Log masuk berjaya! Memuatkan...', 'success');
-                            
-                            // Save session
-                            localStorage.setItem('AUTH_TOKEN', result.data.token);
-                            localStorage.setItem('USER_ROLE', result.data.role);
-                            localStorage.setItem('USERNAME', result.data.username);
-                            localStorage.setItem('LOGIN_TIMESTAMP', new Date().getTime());
-                            
-                            console.log('✅ Login successful for:', result.data.username);
-                            
-                            // Fade and redirect
-                            triggerFadeToBlack();
-                            setTimeout(() => {
-                                window.location.href = "index.html";
-                            }, 1200);
-                        }
+                        triggerFadeToBlack();
+                        setTimeout(() => window.location.href = "index.html", 1200);
                     })
                     .catch(error => {
                         setLoading(false);
-                        console.error('❌ Login failed:', error.message);
                         setMessage('❌ ' + error.message, 'error');
                         triggerVibrate();
                     });
             });
 
-            // ============================================
-            // ENTER KEY SUPPORT
-            // ============================================
-            [usernameInput, passwordInput].forEach(input => {
-                input.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        loginBtn.click();
-                    }
-                });
-            });
-
-            // ============================================
-            // CANVAS PIPELINE ANIMATION
-            // ============================================
+            // Canvas Background Animation
             const canvas = document.getElementById('pipelineCanvas');
             const ctx = canvas.getContext('2d');
             let W, H;
-            let pipes = [];
-            let bubbles = [];
+            let pipes = [], bubbles = [];
 
             function resizeCanvas() {
                 W = canvas.width = window.innerWidth;
@@ -693,37 +504,6 @@
                 requestAnimationFrame(animate);
             }
             animate();
-
-            // ============================================
-            // ADD LOADING SPINNER STYLE
-            // ============================================
-            const style = document.createElement('style');
-            style.textContent = `
-                .loading-spinner {
-                    width: 18px;
-                    height: 18px;
-                    border: 2px solid rgba(255,255,255,0.3);
-                    border-top-color: #fff;
-                    border-radius: 50%;
-                    animation: spin 0.8s linear infinite;
-                    display: inline-block;
-                    margin-right: 8px;
-                    vertical-align: middle;
-                }
-                @keyframes spin {
-                    to { transform: rotate(360deg); }
-                }
-            `;
-            document.head.appendChild(style);
-
-            // ============================================
-            // LOG CONFIG (FOR DEBUGGING - Remove in production)
-            // ============================================
-            console.log('🔐 Login Page Loaded');
-            console.log('📡 API URL:', CONFIG.API_URL);
-            console.log('🔑 Secret Key:', CONFIG.SECRET_KEY ? '***SET***' : '❌ MISSING!');
-            console.log('🔄 Max Retry:', CONFIG.MAX_RETRY);
-
         })();
     </script>
 </body>
