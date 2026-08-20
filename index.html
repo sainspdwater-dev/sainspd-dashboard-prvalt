@@ -1233,12 +1233,16 @@
                 this.showToast('Menjana PDF 1 halaman...', 'loading');
                 const element = document.getElementById('print-preview-content');
                 
+                // --- TOLAK KE KANAN DI SINI ---
+                // Anda boleh ubah nilai '60px' atau '80px' mengikut jarak ke kanan yang anda mahu
+                element.style.paddingLeft = '80px'; 
+                
                 const opt = {
-                    margin:       [0.15, 1.1, 0.15, 0.1], 
+                    margin:       [0.15, 0.1, 0.15, 0.1], // Margin sisi dikecilkan kerana anjakan dibuat melalui padding di atas
                     filename:     `Rekod_Penyelenggaraan_${this.currentPrintSerialNo}.pdf`,
                     image:        { type: 'jpeg', quality: 0.98 },
                     html2canvas:  { 
-                        scale: 1.2, 
+                        scale: 1.4, 
                         useCORS: true, 
                         scrollY: 0,
                         windowWidth: element.scrollWidth 
@@ -1247,7 +1251,11 @@
                 };
 
                 html2pdf().set(opt).from(element).save().then(() => {
+                    // Kembalikan padding asal selepas PDF selesai dijana supaya paparan web tidak terjejas
+                    element.style.paddingLeft = ''; 
                     this.showToast('PDF berjaya dimuat turun!', 'success');
+                }).catch(() => {
+                    element.style.paddingLeft = '';
                 });
             }
 
