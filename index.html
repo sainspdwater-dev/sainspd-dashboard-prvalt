@@ -898,7 +898,7 @@
                 </div>
             </div>
             <div class="modal-body" style="padding: 20px; overflow-y: auto; display: flex; justify-content: center;">
-                <div id="print-preview-content" style="background: white; padding: 10px 40px 40px 100px; box-shadow: var(--shadow-large); width: fit-content; min-width: 700px; min-height: 900px;">
+                <div id="print-preview-content" style="background: white; padding: 10px 40px 10px 100px; box-shadow: var(--shadow-large); width: fit-content; min-width: 700px;">
                     <!-- Borang dimuatkan di sini -->
                 </div>
             </div>
@@ -1146,7 +1146,7 @@
                 `).join('');
             }
 
-            // --- FUNGSI CETAKAN PDF & PRATONTON (STABILISASI LOGO & 1-TO-1 A4) ---
+            // --- FUNGSI CETAKAN PDF & PRATONTON (KEMASKINI: FONT 6.5PT, HITAM PEKAT, TIADA JALUR KELABU) ---
             async openPrintModal(serialNo) {
                 try {
                     this.showToast('Menjana pratonton cetakan...', 'loading');
@@ -1175,7 +1175,7 @@
                     htmlTemplate = htmlTemplate.replace(/{{KATEGORI}}/g, r.kategoriPenyelenggaraan || '');
 
                     const tindakanUlasanText = r.tindakanUlasan || '';
-                    const formatUlasan = `<div style="white-space: pre-wrap; font-family: Arial; font-size: 8.5pt; line-height: 1.2;">${tindakanUlasanText}</div>`;
+                    const formatUlasan = `<div style="white-space: pre-wrap; font-family: Arial; font-size: 7.5pt; line-height: 1.1;">${tindakanUlasanText}</div>`;
                     htmlTemplate = htmlTemplate.replace(/{{TINDAKAN_(&amp;|&)_ULASAN}}/g, formatUlasan);
 
                     const overrideCSS = `
@@ -1191,7 +1191,12 @@
                             margin: 0 !important;
                         }
                         
-                        /* Padatkan saiz jadual agar muat tepat 1 muka surat A4 (1-to-1) */
+                        /* Paksa SEMUA teks termasuk placeholder menjadi warna hitam pekat */
+                        #print-preview-content *, table td, table th, span, div {
+                            color: #000000 !important;
+                        }
+
+                        /* Padatkan saiz jadual agar muat tepat 1 muka surat A4 (Font 6.5pt) */
                         body {
                             background: white !important;
                             margin: 0 !important;
@@ -1200,13 +1205,14 @@
                         table {
                             width: 100% !important;
                             max-width: 100% !important;
-                            font-size: 7pt !important;
+                            font-size: 6.5pt !important;
+                            line-height: 1.05 !important;
                         }
                         tr {
                             height: auto !important;
                         }
                         td {
-                            padding: 0px 2px !important; /* Rapatkan padding sel atas/bawah kepada 0px */
+                            padding: 0px 2px !important; 
                         }
 
                         /* Buang border rujukan textarea */
@@ -1236,29 +1242,34 @@
                 this.showToast('Menjana PDF 1 halaman...', 'loading');
                 const element = document.getElementById('print-preview-content');
                 
-                // --- TOLAK KE KANAN DI SINI ---
-                // Anda boleh ubah nilai '60px' atau '80px' mengikut jarak ke kanan yang anda mahu
+                // Simpan & buang box-shadow sementara untuk elak warna kelabu di sebelah kanan PDF
+                const originalShadow = element.style.boxShadow;
+                element.style.boxShadow = 'none';
+
+                // Anjakan ke kanan untuk cetakan
                 element.style.paddingLeft = '220px'; 
                 
                 const opt = {
-                    margin:       [0.15, 0.1, 0.15, 0.1], // Margin sisi dikecilkan kerana anjakan dibuat melalui padding di atas
+                    margin:       [0.05, 0.1, 0.05, 0.1], 
                     filename:     `Rekod_Penyelenggaraan_${this.currentPrintSerialNo}.pdf`,
                     image:        { type: 'jpeg', quality: 0.98 },
                     html2canvas:  { 
                         scale: 1.0, 
                         useCORS: true, 
                         scrollY: 0,
-                        windowWidth: element.scrollWidth 
+                        backgroundColor: '#ffffff',
+                        windowWidth: element.clientWidth 
                     },
-                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait', compress: true }
-                    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } // Arahan ketat untuk elak pecah halaman
+                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait', compress: true },
+                    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
                 };
 
                 html2pdf().set(opt).from(element).save().then(() => {
-                    // Kembalikan padding asal selepas PDF selesai dijana supaya paparan web tidak terjejas
+                    element.style.boxShadow = originalShadow;
                     element.style.paddingLeft = ''; 
                     this.showToast('PDF berjaya dimuat turun!', 'success');
                 }).catch(() => {
+                    element.style.boxShadow = originalShadow;
                     element.style.paddingLeft = '';
                 });
             }
