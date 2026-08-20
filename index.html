@@ -6,7 +6,6 @@
     <meta name="description" content="Sistem Penyelenggaraan PRV & ALT - Water Supply Command Centre">
     <title>Sistem Penyelenggaraan PRV & ALT</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <!-- Library untuk PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
@@ -269,13 +268,6 @@
             padding: 0.4rem 0.8rem;
             font-size: 0.8rem;
             min-height: 36px;
-        }
-
-        .icon {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
-            flex-shrink: 0;
         }
 
         .user-info {
@@ -667,6 +659,40 @@
     </style>
 </head>
 <body>
+    <script>
+        (function() {
+            const CONFIG = {
+                SECRET_KEY: 'PRV_ALT_SAINSPD_2026_SECURE',
+                API_URL: 'https://dashboardprvalt.sainspdwater.workers.dev/',
+                GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxYkicFTwbjWSXb-jxuGWiENQTQtQBXMJ1pNEQdbHyzawqqdMrLv1DD17rxuIXPSJNU/exec',
+                TIMEOUT: 30000,
+                MAX_SESSION_LIMIT: 60 * 60 * 1000
+            };
+
+            function checkAuthSession() {
+                const authToken = localStorage.getItem('AUTH_TOKEN');
+                const loginTime = localStorage.getItem('LOGIN_TIMESTAMP');
+                const now = new Date().getTime();
+
+                if (!authToken || !loginTime || (now - parseInt(loginTime) > CONFIG.MAX_SESSION_LIMIT)) {
+                    destroySessionAndRedirect();
+                }
+            }
+
+            function destroySessionAndRedirect() {
+                localStorage.clear();
+                window.location.replace('login.html');
+            }
+
+            checkAuthSession();
+
+            window.handleLogout = function() {
+                if (confirm('Adakah anda pasti mahu log keluar?')) {
+                    destroySessionAndRedirect();
+                }
+            };
+        })();
+    </script>
 
     <div id="opening-animation">
         <div class="opening-content">
@@ -859,7 +885,7 @@
         </div>
     </div>
 
-    <!-- Print Modal -->
+    <!-- Print Preview Modal -->
     <div id="print-modal" class="modal hidden">
         <div class="modal-content" style="max-width: 900px; width: 95%; max-height: 95vh; background: #f5f7fa;">
             <div class="modal-header" style="background: var(--primary-blue); color: white;">
@@ -872,7 +898,8 @@
                 </div>
             </div>
             <div class="modal-body" style="padding: 20px; overflow-y: auto; display: flex; justify-content: center;">
-                <div id="print-preview-content" style="background: white; padding: 40px; box-shadow: var(--shadow-large); width: fit-content; min-width: 700px; min-height: 900px;">
+                <!-- Padding atas dikecilkan kepada 10px supaya paparan lebih ke atas -->
+                <div id="print-preview-content" style="background: white; padding: 10px 40px 40px 40px; box-shadow: var(--shadow-large); width: fit-content; min-width: 700px; min-height: 900px;">
                     <!-- Borang dimuatkan di sini -->
                 </div>
             </div>
@@ -880,24 +907,13 @@
     </div>
 
     <script>
-        // JavaScript Logic
-        (function() {
-            const CONFIG = {
-                SECRET_KEY: 'PRV_ALT_SAINSPD_2026_SECURE',
-                API_URL: 'https://dashboardprvalt.sainspdwater.workers.dev/',
-                TIMEOUT: 30000
-            };
-
-            function checkAuthSession() {
-                const authToken = localStorage.getItem('AUTH_TOKEN');
-                if (!authToken) window.location.replace('login.html');
-            }
-            checkAuthSession();
-
-            window.handleLogout = function() {
-                if (confirm('Log keluar?')) { localStorage.clear(); window.location.replace('login.html'); }
-            };
-        })();
+        const CONFIG = {
+            SECRET_KEY: 'PRV_ALT_SAINSPD_2026_SECURE',
+            API_URL: 'https://dashboardprvalt.sainspdwater.workers.dev/',
+            GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxYkicFTwbjWSXb-jxuGWiENQTQtQBXMJ1pNEQdbHyzawqqdMrLv1DD17rxuIXPSJNU/exec',
+            TIMEOUT: 30000,
+            DEBOUNCE_DELAY: 300
+        };
 
         class ApiService {
             constructor() {
@@ -906,13 +922,19 @@
             }
 
             async request(action, data = {}) {
-                const response = await fetch('https://dashboardprvalt.sainspdwater.workers.dev/', {
+                const response = await fetch(CONFIG.API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action, internalSecret: 'PRV_ALT_SAINSPD_2026_SECURE', authToken: this.authToken, userRole: this.userRole, ...data })
+                    body: JSON.stringify({
+                        action: action,
+                        internalSecret: CONFIG.SECRET_KEY,
+                        authToken: this.authToken,
+                        userRole: this.userRole,
+                        ...data
+                    })
                 });
                 const result = await response.json();
-                if (!result.success) throw new Error(result.message || 'Ralat');
+                if (!result.success) throw new Error(result.message || 'Ralat komunikasi pelayan');
                 return result;
             }
 
@@ -926,43 +948,183 @@
 
         class Dashboard {
             constructor() {
-                this.records = []; this.filteredRecords = []; this.charts = {}; this.filters = {};
+                this.records = [];
+                this.filterOptions = {};
+                this.filteredRecords = [];
+                this.charts = {};
+                this.filters = { bulan: '', personel: '', jenis: '', kategori: '', zon: '', search: '' };
+                this.currentPrintSerialNo = '';
                 this.init();
             }
 
             async init() {
                 this.bindEvents();
+                this.initTheme();
                 setTimeout(() => document.getElementById('opening-animation').classList.add('hidden'), 2000);
-                await this.loadData();
-                this.initCharts();
-                this.updateDashboard();
+                this.updateAuthUI();
+                try {
+                    await this.loadData();
+                    this.initCharts();
+                    this.updateDashboard();
+                } catch (error) {
+                    this.showToast(error.message, 'error');
+                }
+            }
+
+            initTheme() {
+                if (localStorage.getItem('prv-alt-theme') === 'night') {
+                    document.documentElement.setAttribute('data-theme', 'night');
+                }
             }
 
             bindEvents() {
                 document.getElementById('tab-rumusan').addEventListener('click', () => this.switchTab('rumusan'));
                 document.getElementById('tab-kemaskini').addEventListener('click', () => this.switchTab('kemaskini'));
+                document.getElementById('refresh-btn').addEventListener('click', () => this.refreshData());
+                document.getElementById('theme-toggle').addEventListener('click', () => {
+                    const night = document.documentElement.getAttribute('data-theme') === 'night';
+                    document.documentElement.setAttribute('data-theme', night ? 'light' : 'night');
+                    localStorage.setItem('prv-alt-theme', night ? 'light' : 'night');
+                });
+
+                ['bulan', 'personel', 'jenis', 'kategori', 'zon'].forEach(id => {
+                    document.getElementById(`filter-${id}`).addEventListener('change', e => {
+                        this.filters[id] = e.target.value;
+                        this.applyFilters();
+                    });
+                });
+
+                document.getElementById('filter-search').addEventListener('input', e => {
+                    this.filters.search = e.target.value.toLowerCase().trim();
+                    this.applyFilters();
+                });
+
                 document.getElementById('modal-close').addEventListener('click', () => this.closeModal());
                 document.getElementById('modal-cancel-btn').addEventListener('click', () => this.closeModal());
                 document.getElementById('modal-save-btn').addEventListener('click', () => this.saveRecord());
             }
 
             switchTab(tab) {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById(`tab-${tab}`).classList.add('active');
                 document.getElementById(`content-${tab}`).classList.add('active');
             }
 
             async loadData() {
-                const res = await api.getDashboardData();
-                this.records = res.data.records;
-                this.filteredRecords = this.records;
+                const [dashRes, filterRes] = await Promise.all([
+                    api.getDashboardData(),
+                    api.getFilterOptions()
+                ]);
+                this.records = dashRes.data.records || [];
+                this.filterOptions = filterRes.data || {};
+                this.filteredRecords = [...this.records];
+                
+                if (dashRes.data.lastSync) {
+                    document.getElementById('last-updated').textContent = `Last Updated: ${new Date(dashRes.data.lastSync).toLocaleString()}`;
+                }
+                this.populateDropdowns();
+            }
+
+            async refreshData() {
+                await this.loadData();
+                this.updateDashboard();
+                this.showToast('Data berjaya dikemaskini', 'success');
+            }
+
+            populateDropdowns() {
+                const pop = (id, list) => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    const val = el.value;
+                    el.innerHTML = `<option value="">Semua</option>` + (list || []).map(i => `<option value="${i}">${i}</option>`).join('');
+                    el.value = val;
+                };
+                pop('filter-bulan', this.filterOptions.bulans);
+                pop('filter-personel', this.filterOptions.personels);
+                pop('filter-jenis', this.filterOptions.jenisPenyelenggaraan);
+                pop('filter-kategori', this.filterOptions.kategoriPenyelenggaraan);
+                pop('filter-zon', ['1', '2']);
+            }
+
+            applyFilters() {
+                this.filteredRecords = this.records.filter(r => {
+                    if (this.filters.bulan && r.bulan !== this.filters.bulan) return false;
+                    if (this.filters.personel && r.dilaksanakanOleh !== this.filters.personel) return false;
+                    if (this.filters.jenis && r.jenisPenyelenggaraan !== this.filters.jenis) return false;
+                    if (this.filters.kategori && r.kategoriPenyelenggaraan !== this.filters.kategori) return false;
+                    if (this.filters.zon && r.zon !== this.filters.zon) return false;
+                    if (this.filters.search) {
+                        const s = this.filters.search;
+                        if (!r.serialNo.toLowerCase().includes(s) && !r.lokasi.toLowerCase().includes(s)) return false;
+                    }
+                    return true;
+                });
+                this.updateTable();
             }
 
             updateDashboard() {
+                this.updateKPIs();
+                this.updateCharts();
                 this.updateTable();
+            }
+
+            updateKPIs() {
+                const t = this.records.length;
+                const prv = this.records.filter(r => r.jenisPenyelenggaraan === 'PRV').length;
+                const alt = this.records.filter(r => r.jenisPenyelenggaraan === 'ALTITUDE').length;
+                const b = this.records.filter(r => r.kategoriPenyelenggaraan === 'BERJADUAL').length;
+                const tb = this.records.filter(r => r.kategoriPenyelenggaraan === 'TIDAK BERJADUAL').length;
+
+                document.getElementById('kpi-grid').innerHTML = `
+                    <div class="kpi-card"><div class="kpi-value">${t}</div><div class="kpi-label">JUMLAH</div></div>
+                    <div class="kpi-card"><div class="kpi-value">${prv}</div><div class="kpi-label">PRV</div></div>
+                    <div class="kpi-card"><div class="kpi-value">${alt}</div><div class="kpi-label">ALTITUDE</div></div>
+                    <div class="kpi-card"><div class="kpi-value">${b}</div><div class="kpi-label">BERJADUAL</div></div>
+                    <div class="kpi-card"><div class="kpi-value">${tb}</div><div class="kpi-label">TIDAK BERJADUAL</div></div>
+                `;
+            }
+
+            initCharts() {
+                ['bulan', 'jenis', 'kategori', 'zon', 'personel'].forEach(type => {
+                    const ctx = document.getElementById(`chart-${type}`).getContext('2d');
+                    this.charts[type] = new Chart(ctx, {
+                        type: type === 'jenis' ? 'doughnut' : type === 'kategori' ? 'pie' : 'bar',
+                        data: { labels: [], datasets: [{ data: [], backgroundColor: ['#006994', '#00b3b3', '#008080', '#f59e0b', '#3b82f6', '#10b981'] }] },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+                });
+            }
+
+            updateCharts() {
+                const count = (key) => {
+                    const map = {};
+                    this.records.forEach(r => { if (r[key]) map[r[key]] = (map[r[key]] || 0) + 1; });
+                    return map;
+                };
+                const update = (type, map) => {
+                    this.charts[type].data.labels = Object.keys(map);
+                    this.charts[type].data.datasets[0].data = Object.values(map);
+                    this.charts[type].update();
+                };
+                update('bulan', count('bulan'));
+                update('jenis', count('jenisPenyelenggaraan'));
+                update('kategori', count('kategoriPenyelenggaraan'));
+                update('zon', count('zon'));
+                update('personel', count('dilaksanakanOleh'));
             }
 
             updateTable() {
                 const tbody = document.getElementById('table-body');
+                const emptyState = document.getElementById('empty-state');
+                
+                if (this.filteredRecords.length === 0) {
+                    tbody.innerHTML = '';
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+                emptyState.classList.add('hidden');
+
                 tbody.innerHTML = this.filteredRecords.map(r => `
                     <tr>
                         <td><strong>${r.serialNo}</strong></td>
@@ -985,22 +1147,23 @@
                 `).join('');
             }
 
-            // --- FUNGSI CETAKAN PDF ---
+            // --- FUNGSI CETAKAN PDF & PRATONTON ---
             async openPrintModal(serialNo) {
                 try {
-                    this.showToast('Menjana pratonton...', 'loading');
+                    this.showToast('Menjana pratonton cetakan...', 'loading');
+
                     const res = await api.getRecordBySerialNo(serialNo);
                     const r = res.data.record;
                     this.currentPrintSerialNo = r.serialNo;
 
                     const borangUrl = 'https://raw.githubusercontent.com/sainspdwater-dev/borangprvalt/refs/heads/main/borang.htm';
                     const borangRes = await fetch(borangUrl);
+                    if (!borangRes.ok) throw new Error('Gagal memuat turun templat borang.htm dari GitHub');
                     let htmlTemplate = await borangRes.text();
 
                     const githubImageBaseUrl = 'https://raw.githubusercontent.com/sainspdwater-dev/borangprvalt/refs/heads/main/';
                     htmlTemplate = htmlTemplate.replace(/borang_files\//g, githubImageBaseUrl);
 
-                    // Ganti Placeholder
                     htmlTemplate = htmlTemplate.replace(/{{LOKASI}}/g, r.lokasi || '');
                     htmlTemplate = htmlTemplate.replace(/{{ZON}}/g, r.zon || '');
                     htmlTemplate = htmlTemplate.replace(/{{JENIS_PENYELENGGARAAN}}/g, r.jenisPenyelenggaraan || '');
@@ -1011,35 +1174,127 @@
                     htmlTemplate = htmlTemplate.replace(/{{DILAKSANAKAN_OLEH}}/g, r.dilaksanakanOleh || '');
                     htmlTemplate = htmlTemplate.replace(/{{SERIAL_NO}}/g, r.serialNo || '');
                     htmlTemplate = htmlTemplate.replace(/{{KATEGORI}}/g, r.kategoriPenyelenggaraan || '');
-                    
-                    const formatUlasan = `<div style="white-space: pre-wrap; font-family: Arial; font-size: 9pt;">${r.tindakanUlasan || ''}</div>`;
+
+                    const tindakanUlasanText = r.tindakanUlasan || '';
+                    const formatUlasan = `<div style="white-space: pre-wrap; font-family: Arial; font-size: 9pt;">${tindakanUlasanText}</div>`;
                     htmlTemplate = htmlTemplate.replace(/{{TINDAKAN_(&amp;|&)_ULASAN}}/g, formatUlasan);
 
-                    htmlTemplate = htmlTemplate.replace('</head>', '<style>.xl12631610 { text-decoration: none !important; border: none !important; outline: none !important; }</style></head>');
+                    const overrideCSS = `
+                    <style>
+                        .xl12631610 { 
+                            text-decoration: none !important; 
+                            border: none !important; 
+                            outline: none !important; 
+                        }
+                    </style>`;
+                    htmlTemplate = htmlTemplate.replace('</head>', overrideCSS + '</head>');
 
                     document.getElementById('print-preview-content').innerHTML = htmlTemplate;
                     document.getElementById('print-modal').classList.remove('hidden');
-                } catch (e) { this.showToast(e.message, 'error'); }
+                    this.showToast('Pratonton sedia untuk dicetak', 'success');
+
+                } catch (error) {
+                    this.showToast(error.message, 'error');
+                }
             }
 
-            closePrintModal() { document.getElementById('print-modal').classList.add('hidden'); }
+            closePrintModal() {
+                document.getElementById('print-modal').classList.add('hidden');
+                setTimeout(() => { document.getElementById('print-preview-content').innerHTML = ''; }, 300);
+            }
 
             downloadPDF() {
+                this.showToast('Menjana PDF, sila tunggu...', 'loading');
                 const element = document.getElementById('print-preview-content');
-                html2pdf().set({
-                    margin: [0.3, 0.3, 0.3, 0.3],
-                    filename: `Rekod_${this.currentPrintSerialNo}.pdf`,
-                    html2canvas: { scale: 2, useCORS: true }
-                }).from(element).save();
+                
+                const opt = {
+                    margin:       [0.05, 0.3, 0.3, 0.3], // Margin atas dikecilkan kepada 0.05 inchi agar dokumen naik ke atas
+                    filename:     `Rekod_Penyelenggaraan_${this.currentPrintSerialNo}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { 
+                        scale: 2, 
+                        useCORS: true, 
+                        windowWidth: element.scrollWidth 
+                    },
+                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opt).from(element).save().then(() => {
+                    this.showToast('PDF berjaya dimuat turun!', 'success');
+                });
             }
 
-            // --- FUNGSI SEDIA ADA ---
-            openModal(serialNo) { /* Logik sedia ada */ }
-            closeModal() { document.getElementById('update-modal').classList.add('hidden'); }
-            saveRecord() { /* Logik sedia ada */ }
-            initCharts() { /* Logik sedia ada */ }
-            showToast(msg, type) { /* Logik sedia ada */ }
+            async openModal(serialNo) {
+                const res = await api.getRecordBySerialNo(serialNo);
+                const r = res.data.record;
+                document.getElementById('serial-no').value = r.serialNo;
+                document.getElementById('modal-tarikh').value = r.tarikh.split('/').reverse().join('-');
+                document.getElementById('modal-masa-mula').value = r.masaMula;
+                document.getElementById('modal-masa-siap').value = r.masaSiap;
+                document.getElementById('modal-lokasi').value = r.lokasi;
+                document.getElementById('modal-tindakan').value = r.tindakanUlasan;
+
+                const pSel = document.getElementById('modal-pelaksana');
+                pSel.innerHTML = (this.filterOptions.personels || []).map(p => `<option value="${p}">${p}</option>`).join('');
+                pSel.value = r.dilaksanakanOleh;
+
+                const sSel = document.getElementById('modal-saiz');
+                sSel.innerHTML = (this.filterOptions.saizList || ['DN100', 'DN150']).map(s => `<option value="${s}">${s}</option>`).join('');
+                sSel.value = r.saiz;
+
+                document.getElementById('modal-jenis').value = r.jenisPenyelenggaraan;
+                document.getElementById('modal-kategori').value = r.kategoriPenyelenggaraan;
+                document.getElementById('modal-zon').value = r.zon;
+
+                document.getElementById('update-modal').classList.remove('hidden');
+            }
+
+            closeModal() {
+                document.getElementById('update-modal').classList.add('hidden');
+            }
+
+            async saveRecord() {
+                const serialNo = document.getElementById('serial-no').value;
+                const data = {
+                    tarikh: document.getElementById('modal-tarikh').value,
+                    masaMula: document.getElementById('modal-masa-mula').value,
+                    masaSiap: document.getElementById('modal-masa-siap').value,
+                    dilaksanakanOleh: document.getElementById('modal-pelaksana').value,
+                    lokasi: document.getElementById('modal-lokasi').value,
+                    jenisPenyelenggaraan: document.getElementById('modal-jenis').value,
+                    saiz: document.getElementById('modal-saiz').value,
+                    kategoriPenyelenggaraan: document.getElementById('modal-kategori').value,
+                    zon: document.getElementById('modal-zon').value,
+                    tindakanUlasan: document.getElementById('modal-tindakan').value
+                };
+                try {
+                    await api.updateRecord(serialNo, data);
+                    this.showToast('Rekod berjaya dikemaskini', 'success');
+                    this.closeModal();
+                    await this.loadData();
+                    this.updateDashboard();
+                } catch (e) {
+                    this.showToast(e.message, 'error');
+                }
+            }
+
+            updateAuthUI() {
+                document.getElementById('username-display').textContent = localStorage.getItem('USERNAME') || 'User';
+                const role = localStorage.getItem('USER_ROLE') || 'USER';
+                const badge = document.getElementById('role-badge-display');
+                badge.textContent = role;
+                if (role.includes('ADMIN')) badge.classList.add('admin');
+            }
+
+            showToast(msg, type = 'success') {
+                const t = document.createElement('div');
+                t.className = `toast ${type}`;
+                t.textContent = msg;
+                document.body.appendChild(t);
+                setTimeout(() => t.remove(), 3000);
+            }
         }
+
         const dashboard = new Dashboard();
     </script>
 </body>
