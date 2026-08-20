@@ -1146,7 +1146,7 @@
                 `).join('');
             }
 
-            // --- FUNGSI CETAKAN PDF & PRATONTON (KUNCI LOGO DI SCROLL & ANJAKAN 250px) ---
+            // --- FUNGSI CETAKAN PDF & PRATONTON (KUNCI LOGO TETAP & BERSIHKAN INLINE STYLE) ---
             async openPrintModal(serialNo) {
                 try {
                     this.showToast('Menjana pratonton cetakan...', 'loading');
@@ -1180,17 +1180,19 @@
 
                     const overrideCSS = `
                     <style>
-                        /* Kunci kedudukan logo Excel VML dan elak terapung/fixed ketika scroll */
+                        /* Kunci kedudukan logo Excel VML dan elak terapung */
                         v\\:shape, .shape {
                             display: none !important;
                         }
                         #print-preview-content img {
-                            position: relative !important;
+                            position: static !important;
+                            top: auto !important;
+                            left: auto !important;
+                            transform: none !important;
+                            float: none !important;
                             max-height: 24px !important;
                             display: inline-block !important;
                             margin: 0 !important;
-                            top: auto !important;
-                            left: auto !important;
                         }
                         
                         /* Paksa SEMUA teks termasuk placeholder menjadi warna hitam pekat */
@@ -1227,6 +1229,19 @@
                     htmlTemplate = htmlTemplate.replace('</head>', overrideCSS + '</head>');
 
                     document.getElementById('print-preview-content').innerHTML = htmlTemplate;
+
+                    // TAMBAHAN JS: Paksa buang gaya inline pada imej Excel supaya logo kekal diam di tempatnya
+                    const previewImgs = document.querySelectorAll('#print-preview-content img');
+                    previewImgs.forEach(img => {
+                        img.style.setProperty('position', 'static', 'important');
+                        img.style.setProperty('top', 'auto', 'important');
+                        img.style.setProperty('left', 'auto', 'important');
+                        img.style.setProperty('transform', 'none', 'important');
+                        img.style.setProperty('float', 'none', 'important');
+                        img.style.setProperty('display', 'inline-block', 'important');
+                        img.style.setProperty('margin', '0', 'important');
+                    });
+
                     document.getElementById('print-modal').classList.remove('hidden');
                     this.showToast('Pratonton sedia untuk dicetak', 'success');
 
@@ -1244,11 +1259,8 @@
                 this.showToast('Menjana PDF 1 halaman...', 'loading');
                 const element = document.getElementById('print-preview-content');
                 
-                // Simpan & buang box-shadow sementara untuk elak warna kelabu di sebelah kanan PDF
                 const originalShadow = element.style.boxShadow;
                 element.style.boxShadow = 'none';
-
-                // Anjakan ke kanan kekal 250px
                 element.style.paddingLeft = '250px'; 
                 
                 const opt = {
