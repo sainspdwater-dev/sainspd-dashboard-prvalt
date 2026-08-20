@@ -1268,7 +1268,7 @@
 
             async openPrintModal(serialNo) {
                 try {
-                    this.showToast('Menjana pratonton cetakan...', 'loading');
+                    this.showToast('Menjana PDF...', 'loading');
 
                     const res = await api.getRecordBySerialNo(serialNo);
                     const r = res.data.record;
