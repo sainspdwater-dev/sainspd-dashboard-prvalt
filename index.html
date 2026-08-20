@@ -898,7 +898,6 @@
                 </div>
             </div>
             <div class="modal-body" style="padding: 20px; overflow-y: auto; display: flex; justify-content: center;">
-                <!-- Padding atas dikecilkan kepada 10px supaya paparan lebih ke atas -->
                 <div id="print-preview-content" style="background: white; padding: 10px 40px 40px 40px; box-shadow: var(--shadow-large); width: fit-content; min-width: 700px; min-height: 900px;">
                     <!-- Borang dimuatkan di sini -->
                 </div>
@@ -1147,7 +1146,7 @@
                 `).join('');
             }
 
-            // --- FUNGSI CETAKAN PDF & PRATONTON ---
+            // --- FUNGSI CETAKAN PDF & PRATONTON (STABILISASI LOGO & 1-TO-1 A4) ---
             async openPrintModal(serialNo) {
                 try {
                     this.showToast('Menjana pratonton cetakan...', 'loading');
@@ -1176,11 +1175,38 @@
                     htmlTemplate = htmlTemplate.replace(/{{KATEGORI}}/g, r.kategoriPenyelenggaraan || '');
 
                     const tindakanUlasanText = r.tindakanUlasan || '';
-                    const formatUlasan = `<div style="white-space: pre-wrap; font-family: Arial; font-size: 9pt;">${tindakanUlasanText}</div>`;
+                    const formatUlasan = `<div style="white-space: pre-wrap; font-family: Arial; font-size: 8.5pt; line-height: 1.2;">${tindakanUlasanText}</div>`;
                     htmlTemplate = htmlTemplate.replace(/{{TINDAKAN_(&amp;|&)_ULASAN}}/g, formatUlasan);
 
                     const overrideCSS = `
                     <style>
+                        /* Kunci kedudukan logo Excel VML dan tukar kepada imej statik biasa */
+                        v\\:shape, .shape {
+                            display: none !important;
+                        }
+                        img {
+                            position: static !important;
+                            max-height: 28px !important;
+                            display: inline-block !important;
+                            margin: 0 !important;
+                        }
+                        
+                        /* Padatkan saiz jadual agar muat tepat 1 muka surat A4 (1-to-1) */
+                        body {
+                            background: white !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                        }
+                        table {
+                            width: 100% !important;
+                            max-width: 100% !important;
+                            font-size: 8pt !important;
+                        }
+                        td {
+                            padding: 1px 3px !important;
+                        }
+
+                        /* Buang border rujukan textarea */
                         .xl12631610 { 
                             text-decoration: none !important; 
                             border: none !important; 
@@ -1204,19 +1230,20 @@
             }
 
             downloadPDF() {
-                this.showToast('Menjana PDF, sila tunggu...', 'loading');
+                this.showToast('Menjana PDF 1 halaman...', 'loading');
                 const element = document.getElementById('print-preview-content');
                 
                 const opt = {
-                    margin:       [0.05, 0.3, 0.3, 0.3], // Margin atas dikecilkan kepada 0.05 inchi agar dokumen naik ke atas
+                    margin:       [0.15, 0.2, 0.15, 0.2], 
                     filename:     `Rekod_Penyelenggaraan_${this.currentPrintSerialNo}.pdf`,
                     image:        { type: 'jpeg', quality: 0.98 },
                     html2canvas:  { 
                         scale: 2, 
                         useCORS: true, 
+                        scrollY: 0,
                         windowWidth: element.scrollWidth 
                     },
-                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait', compress: true }
                 };
 
                 html2pdf().set(opt).from(element).save().then(() => {
