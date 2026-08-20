@@ -731,7 +731,33 @@
 
     <main>
         <section id="content-rumusan" class="tab-content active">
+            
+            <!-- Filter khas untuk Rumusan & Carta -->
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label for="rumusan-bulan">Bulan</label>
+                    <select id="rumusan-bulan" class="filter-select"><option value="">Semua Bulan</option></select>
+                </div>
+                <div class="filter-group">
+                    <label for="rumusan-personel">Pelaksana</label>
+                    <select id="rumusan-personel" class="filter-select"><option value="">Semua Pelaksana</option></select>
+                </div>
+                <div class="filter-group">
+                    <label for="rumusan-jenis">Jenis Penyelenggaraan</label>
+                    <select id="rumusan-jenis" class="filter-select"><option value="">Semua Jenis</option></select>
+                </div>
+                <div class="filter-group">
+                    <label for="rumusan-kategori">Kategori</label>
+                    <select id="rumusan-kategori" class="filter-select"><option value="">Semua Kategori</option></select>
+                </div>
+                <div class="filter-group">
+                    <label for="rumusan-zon">Zon</label>
+                    <select id="rumusan-zon" class="filter-select"><option value="">Semua Zon</option></select>
+                </div>
+            </div>
+
             <div class="kpi-grid" id="kpi-grid"></div>
+
             <div class="charts-grid">
                 <div class="chart-card">
                     <h3>Penyelenggaraan Mengikut Bulan</h3>
@@ -754,6 +780,28 @@
                     <canvas id="chart-personel"></canvas>
                 </div>
             </div>
+
+            <!-- Jadual Tambahan (Bebas dari Filter Rumusan) -->
+            <div class="table-container" style="margin-top: 2rem;">
+                <div style="padding: 1.2rem; background: var(--primary-blue); color: white;">
+                    <h3 style="font-size: 1.05rem; font-weight: 600;">Jadual Plan & Pelaksanaan</h3>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>BULAN</th>
+                                <th>PLAN (PRV)</th>
+                                <th>PRV</th>
+                                <th>PLAN (ALTITUDE)</th>
+                                <th>ALTITUDE</th>
+                            </tr>
+                        </thead>
+                        <tbody id="plan-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
         </section>
 
         <section id="content-kemaskini" class="tab-content">
@@ -951,7 +999,9 @@
                 this.filterOptions = {};
                 this.filteredRecords = [];
                 this.charts = {};
+                this.planTableData = [];
                 this.filters = { bulan: '', personel: '', jenis: '', kategori: '', zon: '', search: '' };
+                this.rumusanFilters = { bulan: '', personel: '', jenis: '', kategori: '', zon: '' };
                 this.currentPrintSerialNo = '';
                 this.init();
             }
@@ -987,10 +1037,20 @@
                 });
 
                 ['bulan', 'personel', 'jenis', 'kategori', 'zon'].forEach(id => {
+                    // Filter untuk Kemaskini
                     document.getElementById(`filter-${id}`).addEventListener('change', e => {
                         this.filters[id] = e.target.value;
                         this.applyFilters();
                     });
+
+                    // Filter untuk Rumusan & Carta
+                    const rumusanEl = document.getElementById(`rumusan-${id}`);
+                    if(rumusanEl) {
+                        rumusanEl.addEventListener('change', e => {
+                            this.rumusanFilters[id] = e.target.value;
+                            this.updateDashboardCharts();
+                        });
+                    }
                 });
 
                 document.getElementById('filter-search').addEventListener('input', e => {
@@ -1016,6 +1076,7 @@
                     api.getFilterOptions()
                 ]);
                 this.records = dashRes.data.records || [];
+                this.planTableData = dashRes.data.planTable || [];
                 this.filterOptions = filterRes.data || {};
                 this.filteredRecords = [...this.records];
                 
@@ -1039,11 +1100,20 @@
                     el.innerHTML = `<option value="">Semua</option>` + (list || []).map(i => `<option value="${i}">${i}</option>`).join('');
                     el.value = val;
                 };
+
+                // Untuk Tab Kemaskini
                 pop('filter-bulan', this.filterOptions.bulans);
                 pop('filter-personel', this.filterOptions.personels);
                 pop('filter-jenis', this.filterOptions.jenisPenyelenggaraan);
                 pop('filter-kategori', this.filterOptions.kategoriPenyelenggaraan);
                 pop('filter-zon', ['1', '2']);
+
+                // Untuk Tab Rumusan
+                pop('rumusan-bulan', this.filterOptions.bulans);
+                pop('rumusan-personel', this.filterOptions.personels);
+                pop('rumusan-jenis', this.filterOptions.jenisPenyelenggaraan);
+                pop('rumusan-kategori', this.filterOptions.kategoriPenyelenggaraan);
+                pop('rumusan-zon', ['1', '2']);
             }
 
             applyFilters() {
@@ -1063,17 +1133,30 @@
             }
 
             updateDashboard() {
-                this.updateKPIs();
-                this.updateCharts();
+                this.updateDashboardCharts();
                 this.updateTable();
             }
 
-            updateKPIs() {
-                const t = this.records.length;
-                const prv = this.records.filter(r => r.jenisPenyelenggaraan === 'PRV').length;
-                const alt = this.records.filter(r => r.jenisPenyelenggaraan === 'ALTITUDE').length;
-                const b = this.records.filter(r => r.kategoriPenyelenggaraan === 'BERJADUAL').length;
-                const tb = this.records.filter(r => r.kategoriPenyelenggaraan === 'TIDAK BERJADUAL').length;
+            updateDashboardCharts() {
+                let filtered = this.records.filter(r => {
+                    if (this.rumusanFilters.bulan && r.bulan !== this.rumusanFilters.bulan) return false;
+                    if (this.rumusanFilters.personel && r.dilaksanakanOleh !== this.rumusanFilters.personel) return false;
+                    if (this.rumusanFilters.jenis && r.jenisPenyelenggaraan !== this.rumusanFilters.jenis) return false;
+                    if (this.rumusanFilters.kategori && r.kategoriPenyelenggaraan !== this.rumusanFilters.kategori) return false;
+                    if (this.rumusanFilters.zon && r.zon !== this.rumusanFilters.zon) return false;
+                    return true;
+                });
+                this.updateKPIs(filtered);
+                this.updateCharts(filtered);
+                this.renderPlanTable();
+            }
+
+            updateKPIs(dataRecords) {
+                const t = dataRecords.length;
+                const prv = dataRecords.filter(r => r.jenisPenyelenggaraan === 'PRV').length;
+                const alt = dataRecords.filter(r => r.jenisPenyelenggaraan === 'ALTITUDE').length;
+                const b = dataRecords.filter(r => r.kategoriPenyelenggaraan === 'BERJADUAL').length;
+                const tb = dataRecords.filter(r => r.kategoriPenyelenggaraan === 'TIDAK BERJADUAL').length;
 
                 document.getElementById('kpi-grid').innerHTML = `
                     <div class="kpi-card"><div class="kpi-value">${t}</div><div class="kpi-label">JUMLAH</div></div>
@@ -1087,18 +1170,35 @@
             initCharts() {
                 ['bulan', 'jenis', 'kategori', 'zon', 'personel'].forEach(type => {
                     const ctx = document.getElementById(`chart-${type}`).getContext('2d');
+                    const isBar = type !== 'jenis' && type !== 'kategori';
+
                     this.charts[type] = new Chart(ctx, {
                         type: type === 'jenis' ? 'doughnut' : type === 'kategori' ? 'pie' : 'bar',
-                        data: { labels: [], datasets: [{ data: [], backgroundColor: ['#006994', '#00b3b3', '#008080', '#f59e0b', '#3b82f6', '#10b981'] }] },
-                        options: { responsive: true, maintainAspectRatio: false }
+                        data: { 
+                            labels: [], 
+                            datasets: [{ 
+                                label: isBar ? 'Jumlah' : '',
+                                data: [], 
+                                backgroundColor: ['#006994', '#00b3b3', '#008080', '#f59e0b', '#3b82f6', '#10b981'] 
+                            }] 
+                        },
+                        options: { 
+                            responsive: true, 
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: !isBar // Buang legend untuk carta bar
+                                }
+                            }
+                        }
                     });
                 });
             }
 
-            updateCharts() {
+            updateCharts(dataRecords) {
                 const count = (key) => {
                     const map = {};
-                    this.records.forEach(r => { if (r[key]) map[r[key]] = (map[r[key]] || 0) + 1; });
+                    dataRecords.forEach(r => { if (r[key]) map[r[key]] = (map[r[key]] || 0) + 1; });
                     return map;
                 };
                 const update = (type, map) => {
@@ -1111,6 +1211,26 @@
                 update('kategori', count('kategoriPenyelenggaraan'));
                 update('zon', count('zon'));
                 update('personel', count('dilaksanakanOleh'));
+            }
+
+            renderPlanTable() {
+                const tbody = document.getElementById('plan-table-body');
+                if (!tbody) return;
+                
+                if (!this.planTableData || this.planTableData.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">Tiada rekod PLAN TABLE ditemui</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = this.planTableData.map(r => `
+                    <tr>
+                        <td><strong>${r.bulan}</strong></td>
+                        <td style="color: var(--primary-blue); font-weight: 600;">${r.planPrv}</td>
+                        <td>${r.prv}</td>
+                        <td style="color: var(--teal); font-weight: 600;">${r.planAlt}</td>
+                        <td>${r.alt}</td>
+                    </tr>
+                `).join('');
             }
 
             updateTable() {
@@ -1146,7 +1266,6 @@
                 `).join('');
             }
 
-            // --- FUNGSI CETAKAN PDF & PRATONTON (KUNCI LOGO TETAP & BERSIHKAN INLINE STYLE) ---
             async openPrintModal(serialNo) {
                 try {
                     this.showToast('Menjana pratonton cetakan...', 'loading');
@@ -1180,10 +1299,7 @@
 
                     const overrideCSS = `
                     <style>
-                        /* Kunci kedudukan logo Excel VML dan elak terapung */
-                        v\\:shape, .shape {
-                            display: none !important;
-                        }
+                        v\\:shape, .shape { display: none !important; }
                         #print-preview-content img {
                             position: static !important;
                             top: auto !important;
@@ -1194,43 +1310,24 @@
                             display: inline-block !important;
                             margin: 0 !important;
                         }
-                        
-                        /* Paksa SEMUA teks termasuk placeholder menjadi warna hitam pekat */
                         #print-preview-content *, table td, table th, span, div {
                             color: #000000 !important;
                         }
-
-                        /* Padatkan saiz jadual agar muat tepat 1 muka surat A4 (Font 6.5pt) */
-                        body {
-                            background: white !important;
-                            margin: 0 !important;
-                            padding: 0 !important;
-                        }
+                        body { background: white !important; margin: 0 !important; padding: 0 !important; }
                         table {
                             width: 100% !important;
                             max-width: 100% !important;
                             font-size: 6.5pt !important;
                             line-height: 1.05 !important;
                         }
-                        tr {
-                            height: auto !important;
-                        }
-                        td {
-                            padding: 0px 2px !important; 
-                        }
-
-                        /* Buang border rujukan textarea */
-                        .xl12631610 { 
-                            text-decoration: none !important; 
-                            border: none !important; 
-                            outline: none !important; 
-                        }
+                        tr { height: auto !important; }
+                        td { padding: 0px 2px !important; }
+                        .xl12631610 { text-decoration: none !important; border: none !important; outline: none !important; }
                     </style>`;
                     htmlTemplate = htmlTemplate.replace('</head>', overrideCSS + '</head>');
 
                     document.getElementById('print-preview-content').innerHTML = htmlTemplate;
 
-                    // TAMBAHAN JS: Paksa buang gaya inline pada imej Excel supaya logo kekal diam di tempatnya
                     const previewImgs = document.querySelectorAll('#print-preview-content img');
                     previewImgs.forEach(img => {
                         img.style.setProperty('position', 'static', 'important');
