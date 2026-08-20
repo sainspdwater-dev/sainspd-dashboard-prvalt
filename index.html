@@ -1251,6 +1251,7 @@
                         windowWidth: element.scrollWidth 
                     },
                     jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait', compress: true }
+                    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } // Arahan ketat untuk elak pecah halaman
                 };
 
                 html2pdf().set(opt).from(element).save().then(() => {
