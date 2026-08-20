@@ -1146,7 +1146,7 @@
                 `).join('');
             }
 
-            // --- FUNGSI CETAKAN PDF & PRATONTON (KEMASKINI: FONT 6.5PT, HITAM PEKAT, TIADA JALUR KELABU) ---
+            // --- FUNGSI CETAKAN PDF & PRATONTON (KUNCI LOGO DI SCROLL & ANJAKAN 250px) ---
             async openPrintModal(serialNo) {
                 try {
                     this.showToast('Menjana pratonton cetakan...', 'loading');
@@ -1180,15 +1180,17 @@
 
                     const overrideCSS = `
                     <style>
-                        /* Kunci kedudukan logo Excel VML dan tukar kepada imej statik biasa */
+                        /* Kunci kedudukan logo Excel VML dan elak terapung/fixed ketika scroll */
                         v\\:shape, .shape {
                             display: none !important;
                         }
-                        img {
-                            position: static !important;
+                        #print-preview-content img {
+                            position: relative !important;
                             max-height: 24px !important;
                             display: inline-block !important;
                             margin: 0 !important;
+                            top: auto !important;
+                            left: auto !important;
                         }
                         
                         /* Paksa SEMUA teks termasuk placeholder menjadi warna hitam pekat */
@@ -1246,11 +1248,11 @@
                 const originalShadow = element.style.boxShadow;
                 element.style.boxShadow = 'none';
 
-                // Anjakan ke kanan untuk cetakan
+                // Anjakan ke kanan kekal 250px
                 element.style.paddingLeft = '250px'; 
                 
                 const opt = {
-                    margin:       [0.05, 0.4, 0.05, 0.1], 
+                    margin:       [0.05, 0.1, 0.05, 0.1], 
                     filename:     `Rekod_Penyelenggaraan_${this.currentPrintSerialNo}.pdf`,
                     image:        { type: 'jpeg', quality: 0.98 },
                     html2canvas:  { 
