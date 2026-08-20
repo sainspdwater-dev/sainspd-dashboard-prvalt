@@ -1294,7 +1294,7 @@
                     htmlTemplate = htmlTemplate.replace(/{{KATEGORI}}/g, r.kategoriPenyelenggaraan || '');
 
                     const tindakanUlasanText = r.tindakanUlasan || '';
-                    const formatUlasan = `<div style="white-space: pre-wrap; font-family: Arial; font-size: 7.5pt; line-height: 1.1;">${tindakanUlasanText}</div>`;
+                    const formatUlasan = `<div style="white-space: pre-wrap; font-family: Arial; font-size: 10pt; line-height: 1.1;">${tindakanUlasanText}</div>`;
                     htmlTemplate = htmlTemplate.replace(/{{TINDAKAN_(&amp;|&)_ULASAN}}/g, formatUlasan);
 
                     const overrideCSS = `
