@@ -1,1338 +1,1456 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Active Leakage Detection PD - Dashboard</title>
-  
-  <!-- Tailwind CSS & Google Fonts -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Chart.js & Chart.js Datalabels Plugin -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
-  
-  <!-- Leaflet CSS & JS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  
-  <!-- Leaflet MarkerCluster CSS & JS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
-  
-  <!-- DataTables CSS & JS -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-
-  <!-- html2pdf Library untuk Cetakan Borang -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#0056D2',
-            secondary: '#2E7DFF',
-            darkblue: '#0F172A',
-            surface: '#F5F7FA',
-            success: '#2E7D32',
-            danger: '#D32F2F',
-            warning: '#ED6C02'
-          },
-          fontFamily: { sans: ['Inter', 'sans-serif'] }
-        }
-      }
-    }
-  </script>
-  <style>
-    body { background-color: #F5F7FA; font-family: 'Inter', sans-serif; }
-    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); }
-    .nav-btn { transition: all 0.2s ease; }
-    .nav-btn.active { background: #0056D2; color: white; box-shadow: 0 4px 12px rgba(0, 86, 210, 0.3); }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
-    .animate-pulse-custom { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-    .tooltip-wrap { position: relative; display: inline-block; }
-    .tooltip-wrap .tooltip-text {
-      visibility: hidden; width: 90px; background-color: #0F172A; color: #fff; text-align: center;
-      border-radius: 6px; padding: 4px 0; position: absolute; z-index: 50; bottom: 125%; left: 50%;
-      transform: translateX(-50%); opacity: 0; transition: opacity 0.2s; font-size: 10px; font-weight: 500;
-    }
-    .tooltip-wrap:hover .tooltip-text { visibility: visible; opacity: 1; }
-
-    /* ==========================================
-       CSS UTAMA UNTUK BORANG BERSIH PRV / ALT
-       ========================================== */
-    .a4-container {
-        width: 794px; 
-        height: 1123px; 
-        position: relative; 
-        background-image: url('borangPRVALT_bersih.jpg'); 
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-color: white;
-        margin: 0 auto;
-        box-shadow: 0 0 15px rgba(0,0,0,0.1);
-        font-family: Arial, sans-serif;
-        color: black;
-    }
-
-    .form-field { 
-        position: absolute; 
-        font-size: 11px; 
-        font-weight: bold; 
-        color: black; 
-        border: 1px dashed red; /* Tukar ke 'none' apabila kedudukan sudah diselaraskan */
-        background: rgba(255, 0, 0, 0.03); 
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Dashboard PRV & Alt – Port Dickson</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
-    .form-textarea { 
-        position: absolute; 
-        font-size: 11px; 
-        font-weight: bold; 
-        color: black; 
-        word-wrap: break-word; 
-        white-space: pre-line; 
-        line-height: 1.3;
-        border: 1px dashed red; /* Tukar ke 'none' apabila kedudukan sudah diselaraskan */
-        background: rgba(255, 0, 0, 0.03);
-    }
+    <style>
+        :root {
+            --primary-blue: #006994;
+            --deep-blue: #004d6e;
+            --water-blue: #00b3b3;
+            --teal: #008080;
+            --soft-grey: #f5f7fa;
+            --white: #ffffff;
+            --text-dark: #1a1a1a;
+            --text-medium: #4a4a4a;
+            --text-light: #6b7280;
+            --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-medium: 0 6px 12px rgba(0, 0, 0, 0.1);
+            --shadow-large: 0 12px 24px rgba(0, 0, 0, 0.15);
+            --border-radius: 8px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --border-color: #e5e7eb;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #dc2626;
+            --info-color: #3b82f6;
+        }
 
-    @media print {
-        body * { visibility: hidden; }
-        #printModal, #printModal * { visibility: visible; }
-        #printModal { position: absolute; left: 0; top: 0; margin: 0; padding: 0; background: white; border: none; box-shadow: none; }
-        .modal-header-print { display: none !important; }
-        .a4-container { box-shadow: none; margin: 0; border: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .form-field, .form-textarea { border: none !important; background: transparent !important; }
-    }
-  </style>
+        [data-theme="night"] {
+            --primary-blue: #0088cc;
+            --deep-blue: #003d5c;
+            --water-blue: #00cccc;
+            --soft-grey: #1a1a1a;
+            --white: #2a2a2a;
+            --text-dark: #ffffff;
+            --text-medium: #cccccc;
+            --text-light: #aaaaaa;
+            --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --shadow-medium: 0 6px 12px rgba(0, 0, 0, 0.4);
+            --shadow-large: 0 12px 24px rgba(0, 0, 0, 0.5);
+            --border-color: #444444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--soft-grey);
+            color: var(--text-dark);
+            transition: background 0.3s ease, color 0.3s ease;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+
+        #opening-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: openingFade 2s ease forwards;
+            pointer-events: none;
+        }
+
+        @keyframes openingFade {
+            0% { opacity: 1; background: #000000; }
+            30% { opacity: 1; background: #003d5c; }
+            70% { opacity: 1; background: #005a80; }
+            100% { opacity: 0; background: var(--soft-grey); visibility: hidden; }
+        }
+
+        .opening-content {
+            text-align: center;
+            color: white;
+            animation: contentFade 2s ease forwards;
+        }
+
+        @keyframes contentFade {
+            0% { opacity: 0; transform: translateY(30px); }
+            40% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-30px); }
+        }
+
+        .water-drop {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            animation: dropPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes dropPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .opening-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.05em;
+            color: white;
+        }
+
+        .opening-subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-bottom: 2rem;
+            letter-spacing: 0.1em;
+        }
+
+        .loading-bar {
+            width: 250px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .loading-progress {
+            width: 0%;
+            height: 100%;
+            background: var(--water-blue);
+            animation: loadingProgress 1.8s ease forwards;
+        }
+
+        @keyframes loadingProgress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .header {
+            background: var(--white);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-soft);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: var(--transition);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-left {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .system-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            letter-spacing: 0.02em;
+            line-height: 1.2;
+        }
+
+        .system-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+            letter-spacing: 0.1em;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .last-updated {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-right: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius);
+            border: 2px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 44px;
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-outline {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--deep-blue);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-secondary {
+            background: var(--soft-grey);
+            color: var(--text-dark);
+            border-color: var(--border-color);
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            min-height: 36px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .role-badge {
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .role-badge.admin {
+            background: #f59e0b;
+            color: #1a1a1a;
+        }
+
+        .role-badge.user {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .main-nav {
+            background: var(--white);
+            padding: 0 2rem;
+            display: flex;
+            gap: 0.5rem;
+            box-shadow: var(--shadow-soft);
+            position: sticky;
+            top: 80px;
+            z-index: 90;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            padding: 1rem 1.5rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-light);
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .nav-tab:hover {
+            color: var(--primary-blue);
+            background: var(--soft-grey);
+        }
+
+        .nav-tab.active {
+            color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: tabFadeIn 0.3s ease;
+        }
+
+        @keyframes tabFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: var(--white);
+            padding: 1.25rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-soft);
+            text-align: center;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--primary-blue);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .kpi-card:hover::before {
+            opacity: 1;
+        }
+
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 0.25rem;
+            line-height: 1;
+        }
+
+        .kpi-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .chart-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-soft);
+            transition: var(--transition);
+        }
+
+        .chart-card:hover {
+            box-shadow: var(--shadow-medium);
+        }
+
+        .chart-card h3 {
+            font-size: 0.95rem;
+            color: var(--text-medium);
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .chart-card canvas {
+            max-height: 280px;
+            width: 100% !important;
+        }
+
+        .filter-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            min-width: 0;
+        }
+
+        .filter-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .filter-select,
+        .filter-input {
+            padding: 0.6rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            background: var(--white);
+            color: var(--text-dark);
+            width: 100%;
+        }
+
+        .filter-select:focus,
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        .table-container {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            min-width: 1000px;
+        }
+
+        .data-table thead {
+            background: var(--primary-blue);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table th {
+            padding: 0.8rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: 0.7rem 0.8rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--soft-grey);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 0.4rem 0.7rem;
+            border-radius: var(--border-radius);
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: white;
+        }
+
+        .btn-update { background: var(--primary-blue); }
+        .btn-print { background: var(--teal); }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-large);
+        }
+
+        .modal-header {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 1.2rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.6rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            background: var(--white);
+            color: var(--text-dark);
+        }
+
+        .form-group input:read-only {
+            background: var(--soft-grey);
+            cursor: not-allowed;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-large);
+            z-index: 10000;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .toast.success { border-left-color: var(--success-color); }
+        .toast.error { border-left-color: var(--danger-color); }
+
+        /* ==========================================
+           CSS KONTENA A4 & PLACEHOLDER JPEG BERSIH
+           ========================================== */
+        .a4-container {
+            width: 794px; 
+            height: 1123px; 
+            position: relative; 
+            background-image: url('borangPRVALT_bersih.jpg'); 
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: white;
+            margin: 0 auto;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            font-family: Arial, sans-serif;
+            color: black;
+        }
+
+        .form-field { 
+            position: absolute; 
+            font-size: 11px; 
+            font-weight: bold; 
+            color: black; 
+            border: 1px dashed red; /* Tukar ke 'none' apabila kedudukan sudah diselaraskan */
+            background: rgba(255, 0, 0, 0.03); 
+        }
+        
+        .form-textarea { 
+            position: absolute; 
+            font-size: 11px; 
+            font-weight: bold; 
+            color: black; 
+            word-wrap: break-word; 
+            white-space: pre-line; 
+            line-height: 1.3;
+            border: 1px dashed red; /* Tukar ke 'none' apabila kedudukan sudah diselaraskan */
+            background: rgba(255, 0, 0, 0.03);
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #print-modal, #print-modal * { visibility: visible; }
+            #print-modal { position: absolute; left: 0; top: 0; margin: 0; padding: 0; background: white; border: none; box-shadow: none; }
+            .modal-header-print { display: none !important; }
+            .a4-container { box-shadow: none; margin: 0; border: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .form-field, .form-textarea { border: none !important; background: transparent !important; }
+        }
+    </style>
 </head>
-<body class="flex flex-col h-screen overflow-hidden text-slate-800">
+<body>
+    <script>
+        (function() {
+            const CONFIG = {
+                SECRET_KEY: 'PRV_ALT_SAINSPD_2026_SECURE',
+                API_URL: 'https://dashboardprvalt.sainspdwater.workers.dev/',
+                GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxYkicFTwbjWSXb-jxuGWiENQTQtQBXMJ1pNEQdbHyzawqqdMrLv1DD17rxuIXPSJNU/exec',
+                TIMEOUT: 30000,
+                MAX_SESSION_LIMIT: 60 * 60 * 1000
+            };
 
-  <!-- LOADING OVERLAY -->
-  <div id="loadingOverlay" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex flex-col items-center justify-center transition-opacity duration-300 hidden">
-    <div class="bg-white p-6 rounded-2xl shadow-2xl flex items-center space-x-4">
-      <div class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-      <div>
-        <h3 class="font-bold text-slate-900">LOADING...</h3>
-        <p class="text-xs text-slate-500">Akan dibuka</p>
-      </div>
+            function checkAuthSession() {
+                const authToken = localStorage.getItem('AUTH_TOKEN');
+                const loginTime = localStorage.getItem('LOGIN_TIMESTAMP');
+                const now = new Date().getTime();
+
+                if (!authToken || !loginTime || (now - parseInt(loginTime) > CONFIG.MAX_SESSION_LIMIT)) {
+                    destroySessionAndRedirect();
+                }
+            }
+
+            function destroySessionAndRedirect() {
+                localStorage.clear();
+                window.location.replace('login.html');
+            }
+
+            checkAuthSession();
+
+            window.handleLogout = function() {
+                if (confirm('Adakah anda pasti mahu log keluar?')) {
+                    destroySessionAndRedirect();
+                }
+            };
+        })();
+    </script>
+
+    <div id="opening-animation">
+        <div class="opening-content">
+            <svg class="water-drop" viewBox="0 0 24 24" fill="var(--water-blue)">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+            </svg>
+            <h1 class="opening-title">PRV & ALT</h1>
+            <p class="opening-subtitle">Sistem Penyelenggaraan & Pengurusan</p>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- TOP NAVIGATION BAR -->
-  <header class="bg-darkblue text-white shadow-md px-6 py-3.5 flex flex-wrap items-center justify-between z-20 flex-shrink-0">
-    <div class="flex items-center space-x-3">
-      <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white font-bold shadow-lg shadow-primary/40">
-        <i class="fa-solid fa-droplet"></i>
-      </div>
-      <div>
-        <h1 class="font-bold text-sm tracking-wide">ACTIVE LEAKAGE DETECTION PD</h1>
-        <p class="text-[10px] text-slate-400">Dashboard ALD &bull; SAINS PORT DICKSON</p>
-      </div>
-    </div>
+    <header class="header">
+        <div class="header-left">
+            <h1 class="system-title">Sistem Penyelenggaraan PRV & ALT</h1>
+            <p class="system-subtitle">Water Supply Command Centre</p>
+        </div>
+        <div class="header-right">
+            <span class="last-updated" id="last-updated">Last Updated: -</span>
+            <div class="user-info">
+                <span id="username-display">User</span>
+                <span class="role-badge" id="role-badge-display">USER</span>
+            </div>
+            <button class="btn btn-outline btn-small" id="refresh-btn">Muat Semula</button>
+            <button class="btn btn-outline btn-small" id="theme-toggle" title="Tukar Tema">Tema</button>
+            <button class="btn btn-danger btn-small" onclick="handleLogout()">Log Keluar</button>
+        </div>
+    </header>
 
-    <nav class="flex items-center space-x-2 my-2 sm:my-0">
-      <button onclick="switchTab('rumusan')" id="nav-rumusan" class="nav-btn active px-4 py-2 rounded-xl font-medium text-xs flex items-center space-x-2 transition">
-        <i class="fa-solid fa-chart-pie"></i>
-        <span>Rumusan</span>
-      </button>
-      <button onclick="switchTab('kemaskini')" id="nav-kemaskini" class="nav-btn px-4 py-2 rounded-xl font-medium text-xs flex items-center space-x-2 transition bg-slate-800/80 text-slate-300 hover:bg-slate-700">
-        <i class="fa-solid fa-pen-to-square"></i>
-        <span>Kemaskini Rekod</span>
-      </button>
-      <button onclick="logout()" id="nav-logout" class="nav-btn px-4 py-2 rounded-xl font-medium text-xs flex items-center space-x-2 transition bg-red-900/50 text-red-300 hover:bg-red-800 ml-2">
-        <i class="fa-solid fa-right-from-bracket"></i>
-        <span>Log Keluar</span>
-      </button>
+    <nav class="main-nav">
+        <button class="nav-tab active" id="tab-rumusan">Rumusan & Carta</button>
+        <button class="nav-tab" id="tab-kemaskini">Senarai & Kemaskini Rekod</button>
     </nav>
 
-    <div class="flex items-center space-x-3">
-      <div id="lockBadge" class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
-        Status Kunci: Memeriksa...
-      </div>
-      <button onclick="refreshData()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition flex items-center space-x-2">
-        <i class="fa-solid fa-rotate"></i>
-        <span class="hidden sm:inline">Muat Semula</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- MAIN CONTENT AREA -->
-  <main class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
-
-    <!-- TAB 1: RUMUSAN -->
-    <div id="tab-rumusan" class="space-y-6">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="glass-card p-5 rounded-2xl border-l-4 border-primary">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs font-medium text-slate-500">Jumlah Rekod</p>
-              <h3 id="kpi-total" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-blue-50 text-primary flex items-center justify-center text-xl shadow-inner">
-              <i class="fa-solid fa-database"></i>
-            </div>
-          </div>
-        </div>
-        <div class="glass-card p-5 rounded-2xl border-l-4 border-success">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs font-medium text-slate-500">Bulan Terpilih / Aktif</p>
-              <h3 id="kpi-bulan" class="text-2xl font-bold text-slate-800 mt-1">-</h3>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-green-50 text-success flex items-center justify-center text-xl shadow-inner">
-              <i class="fa-solid fa-calendar-days"></i>
-            </div>
-          </div>
-        </div>
-        <div class="glass-card p-5 rounded-2xl border-l-4 border-warning">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs font-medium text-slate-500">Zon Teraktif</p>
-              <h3 id="kpi-zon" class="text-lg font-bold text-slate-800 mt-1 truncate max-w-[150px]">-</h3>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-orange-50 text-warning flex items-center justify-center text-xl shadow-inner">
-              <i class="fa-solid fa-location-crosshairs"></i>
-            </div>
-          </div>
-        </div>
-        <div class="glass-card p-5 rounded-2xl border-l-4 border-secondary">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs font-medium text-slate-500">Jenis Pengesanan Utama</p>
-              <h3 id="kpi-pengesanan" class="text-base font-bold text-slate-800 mt-1 truncate max-w-[150px]">-</h3>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-secondary flex items-center justify-center text-xl shadow-inner">
-              <i class="fa-solid fa-magnifying-glass-chart"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="glass-card p-4 rounded-2xl flex flex-wrap gap-3 items-center justify-between">
-        <div class="flex flex-wrap gap-3 items-center flex-1">
-          <div class="relative flex-1 min-w-[200px]">
-            <i class="fa-solid fa-search absolute left-3.5 top-3 text-slate-400 text-sm"></i>
-            <input type="text" id="filter-search" onkeyup="debouncedSearch()" placeholder="Carian pantas semua kolum..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
-          </div>
-          <select id="filter-zon" onchange="applyFilters()" class="py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
-            <option value="">Semua Zon</option>
-          </select>
-          <select id="filter-bulan" onchange="applyFilters()" class="py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
-            <option value="">Semua Bulan</option>
-          </select>
-          <select id="filter-paip" onchange="applyFilters()" class="py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
-            <option value="">Semua Jenis Paip</option>
-          </select>
-          <select id="filter-lapor" onchange="applyFilters()" class="py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
-            <option value="">Semua Dilaporkan Oleh</option>
-          </select>
-          <select id="filter-pengesanan" onchange="applyFilters()" class="py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
-            <option value="">Semua Jenis Pengesanan</option>
-          </select>
-        </div>
-        <div>
-          <button onclick="resetFilters()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold rounded-xl transition">
-            Reset Filter
-          </button>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="glass-card p-5 rounded-2xl">
-          <h4 class="font-bold text-sm text-slate-800 mb-4 flex items-center justify-between">
-            <span>Bilangan Mengikut Bulan</span>
-            <span class="text-xs text-slate-400 font-normal"></span>
-          </h4>
-          <div class="relative h-64"><canvas id="chartBulan"></canvas></div>
-        </div>
-        <div class="glass-card p-5 rounded-2xl">
-          <h4 class="font-bold text-sm text-slate-800 mb-4 flex items-center justify-between">
-            <span>Jenis Pengesanan</span>
-            <span class="text-xs text-slate-400 font-normal"></span>
-          </h4>
-          <div class="relative h-64 flex justify-center"><canvas id="chartPengesanan"></canvas></div>
-        </div>
-        <div class="glass-card p-5 rounded-2xl">
-          <h4 class="font-bold text-sm text-slate-800 mb-4 flex items-center justify-between">
-            <span>Taburan Jenis Paip</span>
-            <span class="text-xs text-slate-400 font-normal"></span>
-          </h4>
-          <div class="relative h-64"><canvas id="chartPaip"></canvas></div>
-        </div>
-        <div class="glass-card p-5 rounded-2xl">
-          <h4 class="font-bold text-sm text-slate-800 mb-4 flex items-center justify-between">
-            <span>Dilaporkan Oleh</span>
-            <span class="text-xs text-slate-400 font-normal"></span>
-          </h4>
-          <div class="relative h-64 flex justify-center"><canvas id="chartLapor"></canvas></div>
-        </div>
-      </div>
-
-      <div class="glass-card p-5 rounded-2xl">
-        <h4 class="font-bold text-sm text-slate-800 mb-4">Taburan Mengikut Zon</h4>
-        <div class="relative h-72"><canvas id="chartZon"></canvas></div>
-      </div>
-
-      <div class="glass-card p-5 rounded-2xl">
-        <h4 class="font-bold text-sm text-slate-800 mb-4">Peta Lokasi Kebocoran</h4>
-        <div id="mapContainer" class="w-full h-96 rounded-xl z-0"></div>
-      </div>
-
-      <div class="glass-card p-5 rounded-2xl overflow-hidden">
-        <h4 class="font-bold text-sm text-slate-800 mb-4">Senarai Aduan Terperinci (Kolum B - O)</h4>
-        <div class="overflow-x-auto">
-          <table id="dataTableRumusan" class="w-full text-xs text-left text-slate-700 stripe hover">
-            <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
-              <tr>
-                <th class="p-3">Tarikh</th>
-                <th class="p-3">No Aduan</th>
-                <th class="p-3">DMA/DMZ</th>
-                <th class="p-3">Alamat</th>
-                <th class="p-3">Koordinat</th>
-                <th class="p-3">Maklumat Kerosakan</th>
-                <th class="p-3">Maklumat Kebocoran</th>
-                <th class="p-3">Jenis Paip</th>
-                <th class="p-3">Saiz Paip</th>
-                <th class="p-3">Dilaporkan Oleh</th>
-                <th class="p-3">Jenis Pengesanan</th>
-                <th class="p-3">Zon</th>
-                <th class="p-3">Bulan</th>
-                <th class="p-3">Unique No</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 2: KEMASKINI REKOD -->
-    <div id="tab-kemaskini" class="space-y-6 hidden">
-      <div class="glass-card p-5 rounded-2xl space-y-4">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-          <div>
-            <h3 class="font-bold text-slate-800 text-base">Laporan & Kemaskini Rekod ALD</h3>
-            <p class="text-xs text-slate-500">Gunakan filter di bawah untuk carian pantas atau klik ikon untuk edit / cetak borang rasmi.</p>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <button onclick="toggleGroupColumns('group1', this)" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition border border-slate-200">
-              <i class="fa-solid fa-plus mr-1"></i> Koordinat
-            </button>
-            <button onclick="toggleGroupColumns('group2', this)" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition border border-slate-200">
-              <i class="fa-solid fa-plus mr-1"></i> Maklumat Tambahan
-            </button>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 items-center bg-slate-50 p-4 rounded-xl border border-slate-200">
-          <div>
-            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Tarikh</label>
-            <input type="text" id="k-tarikh" onkeyup="applyKemaskiniFilters()" onchange="applyKemaskiniFilters()" placeholder="Cari Tarikh..." class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-primary/20">
-          </div>
-          <div>
-            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Bulan</label>
-            <select id="k-bulan" onchange="applyKemaskiniFilters()" class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-primary/20">
-              <option value="">Semua Bulan</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Zon</label>
-            <select id="k-zon" onchange="applyKemaskiniFilters()" class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-primary/20">
-              <option value="">Semua Zon</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-[10px] font-semibold text-slate-500 mb-1">DMA/DMZ</label>
-            <select id="k-dma" onchange="applyKemaskiniFilters()" class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-primary/20">
-              <option value="">Semua DMA/DMZ</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Jenis Pengesanan</label>
-            <select id="k-pengesanan" onchange="applyKemaskiniFilters()" class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-primary/20">
-              <option value="">Semua Pengesanan</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Dilaporkan Oleh</label>
-            <select id="k-lapor" onchange="applyKemaskiniFilters()" class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-primary/20">
-              <option value="">Semua Pelapor</option>
-            </select>
-          </div>
-          <div class="flex items-end space-x-2">
-            <button onclick="resetKemaskiniFilters()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold rounded-lg transition">
-              Reset
-            </button>
-          </div>
-        </div>
-
-        <div class="relative">
-          <i class="fa-solid fa-search absolute left-3.5 top-3 text-slate-400 text-sm"></i>
-          <input type="text" id="k-search" onkeyup="applyKemaskiniFilters()" placeholder="Taip apa sahaja..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
-        </div>
-
-        <div class="overflow-x-auto">
-          <table id="dataTableKemaskini" class="w-full text-xs text-left text-slate-700 stripe hover">
-            <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
-              <tr>
-                <th class="p-3 whitespace-normal min-w-[90px]">Tarikh</th>
-                <th class="p-3">Unique No</th>
-                <th class="p-3">No Aduan</th>
-                <th class="p-3">DMA/DMZ</th>
-                <th class="p-3">Alamat</th>
-                <th class="p-3 group1-col hidden">Koordinat</th>
-                <th class="p-3 group2-col hidden">Maklumat Kerosakan</th>
-                <th class="p-3">Maklumat Kebocoran</th>
-                <th class="p-3">Jenis Paip</th>
-                <th class="p-3">Saiz Paip</th>
-                <th class="p-3">Dilaporkan Oleh</th>
-                <th class="p-3 group2-col hidden">Jenis Pengesanan</th>
-                <th class="p-3">Zon</th>
-                <th class="p-3 text-center">Tindakan</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- MODAL KEMASKINI REKOD -->
-  <div id="editModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
-      
-      <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-        <div>
-          <h3 class="font-bold text-slate-800 text-base">Kemaskini Rekod Aduan</h3>
-          <p class="text-xs text-slate-500" id="modalUniqueNoText">Unique No: -</p>
-        </div>
-        <button onclick="closeEditModal()" class="w-8 h-8 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-500 transition">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div class="p-6 overflow-y-auto space-y-4 flex-1 text-xs">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block font-bold text-slate-700 text-xs mb-1.5">Tarikh</label>
-            <input type="text" id="edit-tarikh" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary text-xs">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 text-xs mb-1.5">Unique No</label>
-            <input type="text" id="edit-uniqueNo" readonly class="w-full p-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 text-xs cursor-not-allowed">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 text-xs mb-1.5">No Aduan</label>
-            <input type="text" id="edit-noAduan" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary text-xs">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 text-xs mb-1.5">DMA / DMZ</label>
-            <input type="text" id="edit-dmaDmz" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary text-xs">
-          </div>
-          <div class="sm:col-span-2">
-            <label class="block font-bold text-slate-700 text-xs mb-1.5">Alamat</label>
-            <textarea id="edit-alamat" rows="2" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary text-xs"></textarea>
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 text-xs mb-1.5">Maklumat Kebocoran / Pecah</label>
-            <input type="text" id="edit-maklumatKebocoran" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary text-xs">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 text-xs mb-1.5">Jenis Paip</label>
-            <input type="text" id="edit-jenisPaip" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary text-xs">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 text-xs mb-1.5">Saiz Paip</label>
-            <input type="text" id="edit-saizPaip" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary text-xs">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 text-xs mb-1.5">Dilaporkan Oleh</label>
-            <input type="text" id="edit-dilaporkanOleh" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary text-xs">
-          </div>
-        </div>
-        <div class="hidden">
-          <input type="text" id="edit-kordinat">
-          <input type="text" id="edit-maklumatKerosakan">
-          <input type="text" id="edit-jenisPengesanan">
-          <input type="text" id="edit-zon">
-        </div>
-      </div>
-
-      <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-end space-x-3">
-        <button onclick="closeEditModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-xl transition">Batal</button>
-        <button onclick="confirmUpdate()" class="px-5 py-2 bg-primary hover:bg-blue-700 text-white font-semibold rounded-xl transition shadow-lg shadow-primary/30">Kemaskini</button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- PRINT MODAL (PRATONTON & CETAK BORANG BERSIH PRV / ALT) -->
-  <div id="printModal" class="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-slate-50 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[95vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
-        
-        <!-- Modal Header -->
-        <div class="modal-header-print p-4 bg-primary text-white flex items-center justify-between shadow-md z-10">
-            <h2 class="font-bold text-lg"><i class="fa-solid fa-print mr-2"></i>Pratonton Borang PRV/ALT</h2>
-            <div class="flex space-x-3 items-center">
-                <button onclick="window.print()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition shadow-lg flex items-center space-x-2">
-                    <i class="fa-solid fa-print"></i><span>Cetak (Print)</span>
-                </button>
-                <button onclick="downloadPDF()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl transition shadow-lg flex items-center space-x-2">
-                    <i class="fa-solid fa-download"></i><span>Muat Turun PDF</span>
-                </button>
-                <button onclick="closePrintModal()" class="w-10 h-10 rounded-full hover:bg-white/20 flex items-center justify-center transition text-xl">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Modal Body (Preview Canvas - A4 Container) -->
-        <div class="p-6 overflow-y-auto flex-1 flex justify-center bg-gray-200">
+    <main>
+        <section id="content-rumusan" class="tab-content active">
             
-            <!-- KONTENA A4 BORANG BERSIH DENGAN PLACEHOLDER -->
-            <div id="borangContainer" class="a4-container">
-                
-                <!-- DATA ASAS & LOKASI -->
-                <div id="pf-lokasi" class="form-field" style="top: 102px; left: 160px; width: 330px;"></div>
-                <div id="pf-zon" class="form-field" style="top: 102px; left: 615px; width: 150px;"></div>
-                
-                <!-- 1.0 JENIS KERJA -->
-                <div id="pf-jenis" class="form-field" style="top: 168px; left: 590px; width: 170px;"></div>
-                
-                <!-- 2.0 MAKLUMAT KERJA -->
-                <div id="pf-tarikh" class="form-field" style="top: 236px; left: 160px; width: 130px;"></div>
-                <div id="pf-masaMula" class="form-field" style="top: 236px; left: 410px; width: 100px;"></div>
-                <div id="pf-masaSiap" class="form-field" style="top: 236px; left: 630px; width: 100px;"></div>
-                
-                <div id="pf-dilaksanakan" class="form-field" style="top: 266px; left: 550px; width: 220px;"></div>
-                
-                <!-- 4.0 TINDAKAN / ULASAN -->
-                <div id="pf-saiz" class="form-field" style="top: 645px; left: 160px; width: 260px;"></div>
-                <div id="pf-tindakan" class="form-textarea" style="top: 670px; left: 160px; width: 260px;"></div>
-
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label for="rumusan-bulan">Bulan</label>
+                    <select id="rumusan-bulan" class="filter-select"><option value="">Semua Bulan</option></select>
+                </div>
+                <div class="filter-group">
+                    <label for="rumusan-personel">Pelaksana</label>
+                    <select id="rumusan-personel" class="filter-select"><option value="">Semua Pelaksana</option></select>
+                </div>
+                <div class="filter-group">
+                    <label for="rumusan-jenis">Jenis Penyelenggaraan</label>
+                    <select id="rumusan-jenis" class="filter-select"><option value="">Semua Jenis</option></select>
+                </div>
+                <div class="filter-group">
+                    <label for="rumusan-kategori">Kategori</label>
+                    <select id="rumusan-kategori" class="filter-select"><option value="">Semua Kategori</option></select>
+                </div>
+                <div class="filter-group">
+                    <label for="rumusan-zon">Zon</label>
+                    <select id="rumusan-zon" class="filter-select"><option value="">Semua Zon</option></select>
+                </div>
             </div>
 
+            <div class="kpi-grid" id="kpi-grid"></div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Penyelenggaraan Mengikut Bulan</h3>
+                    <canvas id="chart-bulan"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Taburan Jenis Penyelenggaraan</h3>
+                    <canvas id="chart-jenis"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Kategori Penyelenggaraan</h3>
+                    <canvas id="chart-kategori"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Penyelenggaraan Mengikut Zon</h3>
+                    <canvas id="chart-zon"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Prestasi Pelaksana (Personel)</h3>
+                    <canvas id="chart-personel"></canvas>
+                </div>
+            </div>
+
+            <div class="table-container" style="margin-top: 2rem;">
+                <div style="padding: 1.2rem; background: var(--primary-blue); color: white;">
+                    <h3 style="font-size: 1.05rem; font-weight: 600;">Jadual Plan & Pelaksanaan</h3>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>BULAN</th>
+                                <th>PLAN (PRV)</th>
+                                <th>PRV</th>
+                                <th>PLAN (ALTITUDE)</th>
+                                <th>ALTITUDE</th>
+                            </tr>
+                        </thead>
+                        <tbody id="plan-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+        <section id="content-kemaskini" class="tab-content">
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label for="filter-bulan">Bulan</label>
+                    <select id="filter-bulan" class="filter-select"><option value="">Semua Bulan</option></select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-personel">Pelaksana</label>
+                    <select id="filter-personel" class="filter-select"><option value="">Semua Pelaksana</option></select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-jenis">Jenis Penyelenggaraan</label>
+                    <select id="filter-jenis" class="filter-select"><option value="">Semua Jenis</option></select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-kategori">Kategori</label>
+                    <select id="filter-kategori" class="filter-select"><option value="">Semua Kategori</option></select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-zon">Zon</label>
+                    <select id="filter-zon" class="filter-select"><option value="">Semua Zon</option></select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-search">Carian</label>
+                    <input type="text" id="filter-search" class="filter-input" placeholder="Cari lokasi, serial no...">
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Serial No</th>
+                                <th>Tarikh</th>
+                                <th>Masa Mula</th>
+                                <th>Masa Siap</th>
+                                <th>Pelaksana</th>
+                                <th>Lokasi</th>
+                                <th>Jenis</th>
+                                <th>Saiz</th>
+                                <th>Kategori</th>
+                                <th>Zon</th>
+                                <th>Tindakan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                </div>
+                <div id="empty-state" class="empty-state hidden">
+                    <div style="font-size:3rem; margin-bottom:1rem;">📊</div>
+                    <p style="font-weight:600; font-size:1.1rem;">Tiada rekod dijumpai</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Update Modal -->
+    <div id="update-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>KEMASKINI REKOD</h2>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="update-form">
+                    <div class="form-group">
+                        <label for="serial-no">Serial No (Read-only)</label>
+                        <input type="text" id="serial-no" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal-tarikh">Tarikh</label>
+                        <input type="date" id="modal-tarikh" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal-masa-mula">Masa Mula</label>
+                        <input type="time" id="modal-masa-mula" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal-masa-siap">Masa Siap</label>
+                        <input type="time" id="modal-masa-siap" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal-pelaksana">Dilaksanakan Oleh</label>
+                        <select id="modal-pelaksana" class="filter-select" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal-lokasi">Lokasi</label>
+                        <input type="text" id="modal-lokasi" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal-jenis">Jenis Penyelenggaraan</label>
+                        <select id="modal-jenis" class="filter-select" required>
+                            <option value="PRV">PRV</option>
+                            <option value="ALTITUDE">ALTITUDE</option>
+                            <option value="Lain-lain">Lain-lain</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal-saiz">Saiz</label>
+                        <select id="modal-saiz" class="filter-select" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal-kategori">Kategori Penyelenggaraan</label>
+                        <select id="modal-kategori" class="filter-select" required>
+                            <option value="BERJADUAL">BERJADUAL</option>
+                            <option value="TIDAK BERJADUAL">TIDAK BERJADUAL</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal-zon">Zon</label>
+                        <select id="modal-zon" class="filter-select" required>
+                            <option value="1">Zon 1</option>
+                            <option value="2">Zon 2</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal-tindakan">Tindakan & Ulasan</label>
+                        <textarea id="modal-tindakan"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modal-cancel-btn">Batal</button>
+                <button class="btn btn-primary" id="modal-save-btn">Simpan Perubahan</button>
+            </div>
         </div>
-
     </div>
-  </div>
 
-  <!-- CUSTOM CONFIRMATION MODAL -->
-  <div id="customConfirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4" style="z-index: 99999;">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center space-y-4 animate-in fade-in zoom-in duration-200">
-      <div class="w-12 h-12 rounded-full bg-blue-50 text-primary flex items-center justify-center mx-auto text-xl">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-      </div>
-      <div>
-        <h4 class="font-bold text-slate-800 text-base">Pengesahan</h4>
-        <p class="text-xs text-slate-500 mt-1">Anda pasti ingin mengemaskini maklumat ini?</p>
-      </div>
-      <div class="flex space-x-3 pt-2">
-        <button onclick="closeCustomConfirm(false)" class="flex-1 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs rounded-xl transition">Batal</button>
-        <button onclick="closeCustomConfirm(true)" class="flex-1 py-2 bg-primary hover:bg-blue-700 text-white font-semibold text-xs rounded-xl transition shadow-lg shadow-primary/30">Ya, Teruskan</button>
-      </div>
+    <!-- Print Preview Modal (JPEG Definisi Tinggi + Overlay Placeholder) -->
+    <div id="print-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 950px; width: 95%; max-height: 95vh; background: #f5f7fa; display: flex; flex-direction: column;">
+            <div class="modal-header modal-header-print" style="background: var(--primary-blue); color: white;">
+                <h2 style="color: white;"><i class="fa-solid fa-print"></i> Pratonton Borang PRV/ALT</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-action" style="background: #3b82f6; padding: 0.6rem 1.2rem; font-size: 0.9rem; color: white;" onclick="window.print()">
+                        Cetak (Print)
+                    </button>
+                    <button class="btn btn-action" style="background: #10b981; padding: 0.6rem 1.2rem; font-size: 0.9rem;" onclick="dashboard.downloadPDF()">
+                        Muat Turun PDF
+                    </button>
+                    <button class="modal-close" style="color: white; font-size: 1.8rem;" onclick="dashboard.closePrintModal()">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body" style="padding: 20px; overflow-y: auto; flex: 1; display: flex; justify-content: center; background: #e2e8f0;">
+                
+                <!-- KONTENA A4 DENGAN LATAR BELAKANG BORANG BERSIH JPEG -->
+                <div id="print-preview-content" class="a4-container">
+                    <!-- Data Asas & Lokasi -->
+                    <div id="pf-lokasi" class="form-field" style="top: 102px; left: 160px; width: 330px;"></div>
+                    <div id="pf-zon" class="form-field" style="top: 102px; left: 615px; width: 150px;"></div>
+                    
+                    <!-- 1.0 Jenis Kerja -->
+                    <div id="pf-jenis" class="form-field" style="top: 168px; left: 590px; width: 170px;"></div>
+                    
+                    <!-- 2.0 Maklumat Kerja -->
+                    <div id="pf-tarikh" class="form-field" style="top: 236px; left: 160px; width: 130px;"></div>
+                    <div id="pf-masaMula" class="form-field" style="top: 236px; left: 410px; width: 100px;"></div>
+                    <div id="pf-masaSiap" class="form-field" style="top: 236px; left: 630px; width: 100px;"></div>
+                    
+                    <div id="pf-dilaksanakan" class="form-field" style="top: 266px; left: 550px; width: 220px;"></div>
+                    
+                    <!-- 4.0 Tindakan / Ulasan -->
+                    <div id="pf-saiz" class="form-field" style="top: 645px; left: 160px; width: 260px;"></div>
+                    <div id="pf-tindakan" class="form-textarea" style="top: 670px; left: 160px; width: 260px;"></div>
+                </div>
+
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- TOAST NOTIFICATION -->
-  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-3 px-5 py-3 rounded-2xl shadow-xl text-white font-medium text-xs">
-    <i id="toastIcon" class="fa-solid fa-circle-check text-base"></i>
-    <span id="toastMessage">Mesej Notifikasi</span>
-  </div>
+    <script>
+        const CONFIG = {
+            SECRET_KEY: 'PRV_ALT_SAINSPD_2026_SECURE',
+            API_URL: 'https://dashboardprvalt.sainspdwater.workers.dev/',
+            GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxYkicFTwbjWSXb-jxuGWiENQTQtQBXMJ1pNEQdbHyzawqqdMrLv1DD17rxuIXPSJNU/exec',
+            TIMEOUT: 30000,
+            DEBOUNCE_DELAY: 300
+        };
 
-  <!-- JAVASCRIPT LOGIC -->
-  <script>
-    // ============================================================
-    // SECURITY: Authentication Check & Session Management
-    // ============================================================
-    (function checkAuth() {
-        const token = sessionStorage.getItem('pd_water_auth_token');
-        if (!token) {
-            window.location.replace('./index.html?expired=true');
-            return;
-        }
-        
-        const loginTime = parseInt(sessionStorage.getItem('pd_water_login_time'));
-        if (loginTime && (Date.now() - loginTime) > 7200000) {
-            sessionStorage.removeItem('pd_water_auth_token');
-            sessionStorage.removeItem('pd_water_login_time');
-            window.location.replace('./index.html?expired=true');
-            return;
-        }
-    })();
-
-    // ============================================================
-    // SECURITY: Prevent Back Navigation After Logout
-    // ============================================================
-    (function preventBackNavigation() {
-        history.pushState(null, null, location.href);
-        window.addEventListener('popstate', function(event) {
-            const token = sessionStorage.getItem('pd_water_auth_token');
-            if (!token) {
-                window.location.replace('./index.html?expired=true');
-            } else {
-                history.pushState(null, null, location.href);
+        class ApiService {
+            constructor() {
+                this.authToken = localStorage.getItem('AUTH_TOKEN') || '';
+                this.userRole = localStorage.getItem('USER_ROLE') || 'USER';
             }
-        });
-    })();
 
-    // ============================================================
-    // CONFIGURATION
-    // ============================================================
-    const CF_WORKER_URL = 'https://ald-gateway.sainspdwater.workers.dev';
-    const SESSION_DURATION = 7200000;
-
-    let globalData = [];
-    let filteredData = [];
-    let isLockEdit = 'TIDAK';
-    let mapInstance = null;
-    let markerClusterGroup = null;
-    
-    const chartsCache = {};
-    let dtRumusan = null;
-    let dtKemaskini = null;
-
-    let currentDataVersion = "0";
-    let pollingInterval = null;
-
-    const bulanOrder = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ogo", "Sep", "Okt", "Nov", "Dis"];
-    const CHART_COLORS = ['#0056D2', '#2E7DFF', '#2E7D32', '#ED6C02', '#8B5CF6', '#EC4899', '#06B6D4', '#10B981', '#F59E0B', '#3B82F6'];
-
-    // ============================================================
-    // SESSION MANAGEMENT
-    // ============================================================
-    function checkSessionExpiry() {
-        const loginTime = parseInt(sessionStorage.getItem('pd_water_login_time'));
-        if (loginTime && (Date.now() - loginTime) > SESSION_DURATION) {
-            sessionStorage.removeItem('pd_water_auth_token');
-            sessionStorage.removeItem('pd_water_login_time');
-            window.location.replace('./index.html?expired=true');
-            return false;
-        }
-        return true;
-    }
-
-    function refreshSession() {
-        sessionStorage.setItem('pd_water_login_time', Date.now().toString());
-    }
-
-    async function secureFetch(url, options) {
-        if (!checkSessionExpiry()) {
-            throw new Error('Session expired');
-        }
-        refreshSession();
-        return fetch(url, options);
-    }
-
-    // ============================================================
-    // LOGOUT FUNCTION
-    // ============================================================
-    function logout() {
-        sessionStorage.removeItem('pd_water_auth_token');
-        sessionStorage.removeItem('pd_water_login_time');
-        
-        if (pollingInterval) {
-            clearInterval(pollingInterval);
-            pollingInterval = null;
-        }
-        
-        globalData = [];
-        filteredData = [];
-        window.location.replace('./index.html');
-    }
-
-    // ============================================================
-    // INITIALIZATION
-    // ============================================================
-    $(document).ready(function() {
-      initEmptyComponents();
-      loadData();
-    });
-
-    // ============================================================
-    // DATA LOADING FUNCTIONS
-    // ============================================================
-    async function loadData() {
-      showLoading(true);
-      try {
-        const response = await secureFetch(CF_WORKER_URL, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json', 
-            'Authorization': 'Bearer ' + sessionStorage.getItem('pd_water_auth_token') 
-          },
-          body: JSON.stringify({ action: 'getData' })
-        });
-        const result = await response.json();
-        handleDataLoaded(result, false);
-      } catch (error) {
-        showLoading(false);
-        if (error.message === 'Session expired') {
-          window.location.replace('./index.html?expired=true');
-        } else {
-          showToast('Gagal memuatkan data: ' + error.message, 'danger');
-        }
-      }
-    }
-
-    async function backgroundLoadData() {
-      try {
-        if (!checkSessionExpiry()) return;
-        const response = await secureFetch(CF_WORKER_URL, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json', 
-            'Authorization': 'Bearer ' + sessionStorage.getItem('pd_water_auth_token') 
-          },
-          body: JSON.stringify({ action: 'getData' })
-        });
-        const result = await response.json();
-        handleDataLoaded(result, true);
-      } catch (error) {}
-    }
-
-    function startSmartPolling() {
-      if (pollingInterval) clearInterval(pollingInterval);
-      pollingInterval = setInterval(async () => {
-        try {
-          if (!checkSessionExpiry()) {
-            clearInterval(pollingInterval);
-            pollingInterval = null;
-            return;
-          }
-          const response = await secureFetch(CF_WORKER_URL, {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json', 
-              'Authorization': 'Bearer ' + sessionStorage.getItem('pd_water_auth_token') 
-            },
-            body: JSON.stringify({ action: 'checkVersion' })
-          });
-          const result = await response.json();
-          if (result.success && result.version && result.version !== currentDataVersion && currentDataVersion !== "0") {
-             backgroundLoadData();
-          }
-        } catch (error) {}
-      }, 10000);
-    }
-
-    // ============================================================
-    // DATA HANDLING FUNCTIONS
-    // ============================================================
-    function parseCoordinates(str) {
-      if (str === null || str === undefined) return { coords: null };
-      const trimmed = String(str).trim();
-      const invalidValues = ['-', 'tiada', 'n/a', '#n/a', 'kosong', '""', ''];
-      if (invalidValues.includes(trimmed.toLowerCase())) return { coords: null };
-      if (!trimmed.includes(',')) return { coords: null };
-      const parts = trimmed.split(',');
-      if (parts.length < 2) return { coords: null };
-      const lat = parseFloat(parts[0].trim());
-      const lng = parseFloat(parts[1].trim());
-      if (isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0) || lat < -90 || lat > 90 || lng < -180 || lng > 180) return { coords: null };
-      return { coords: [lat, lng] };
-    }
-
-    function handleDataLoaded(response, isSoftRefresh = false) {
-      if (!response.success) {
-        if (!isSoftRefresh) showLoading(false);
-        showToast('Ralat: ' + response.message, 'danger');
-        return;
-      }
-
-      if (response.version) currentDataVersion = response.version;
-      isLockEdit = response.lockEdit;
-      updateLockBadgeUI();
-
-      const rawData = response.data;
-      globalData = [];
-      for (let i = 0; i < rawData.length; i++) {
-        const r = rawData[i];
-        const uniqueNo = r[13];
-        if (uniqueNo) {
-          globalData.push({
-            tarikh: r[0] || '-', noAduan: r[1] || '-', dmaDmz: r[2] || '-', alamat: r[3] || '-',
-            kordinat: r[4] || '', maklumatKerosakan: r[5] || '-', maklumatKebocoran: r[6] || '-',
-            jenisPaip: r[7] || '-', saizPaip: r[8] || '-', dilaporkanOleh: r[9] || '-',
-            jenisPengesanan: r[10] || '-', zon: r[11] || '-', bulan: r[12] || '-', uniqueNo: r[13]
-          });
-        }
-      }
-
-      filteredData = [...globalData];
-
-      if (isSoftRefresh) {
-        const fZon = document.getElementById('filter-zon').value;
-        const fBulan = document.getElementById('filter-bulan').value;
-        const fPaip = document.getElementById('filter-paip').value;
-        const fLapor = document.getElementById('filter-lapor').value;
-        const fPengesanan = document.getElementById('filter-pengesanan').value;
-
-        populateFilters();
-        document.getElementById('filter-zon').value = fZon;
-        document.getElementById('filter-bulan').value = fBulan;
-        document.getElementById('filter-paip').value = fPaip;
-        document.getElementById('filter-lapor').value = fLapor;
-        document.getElementById('filter-pengesanan').value = fPengesanan;
-
-        applyFilters();
-        showToast('Data Berjaya Dikemaskini...', 'success');
-      } else {
-        populateFilters();
-        applyFilters();
-        showLoading(false);
-        startSmartPolling();
-      }
-
-      setTimeout(() => { if (mapInstance) mapInstance.invalidateSize(); }, 200);
-    }
-
-    // ============================================================
-    // UI FUNCTIONS
-    // ============================================================
-    function initEmptyComponents() {
-      chartsCache['chartBulan'] = createChartInstance('chartBulan', 'bar', false);
-      chartsCache['chartPengesanan'] = createChartInstance('chartPengesanan', 'pie', false);
-      chartsCache['chartPaip'] = createChartInstance('chartPaip', 'bar', false);
-      chartsCache['chartLapor'] = createChartInstance('chartLapor', 'doughnut', false);
-      chartsCache['chartZon'] = createChartInstance('chartZon', 'bar', true);
-
-      dtRumusan = $('#dataTableRumusan').DataTable({
-        pageLength: 10, responsive: true, deferRender: true, data: [],
-        columns: [
-          { data: 'tarikh' }, { data: 'noAduan', className: 'font-semibold' }, { data: 'dmaDmz' },
-          { data: 'alamat' }, { data: 'kordinat' }, { data: 'maklumatKerosakan' },
-          { data: 'maklumatKebocoran' }, { data: 'jenisPaip' }, { data: 'saizPaip' },
-          { data: 'dilaporkanOleh' }, { data: 'jenisPengesanan' }, { data: 'zon' },
-          { data: 'bulan' }, { data: 'uniqueNo' }
-        ]
-      });
-
-      dtKemaskini = $('#dataTableKemaskini').DataTable({
-        pageLength: 10, responsive: true, deferRender: true, data: [],
-        columns: [
-          { data: 'tarikh', className: 'whitespace-normal' },
-          { data: 'uniqueNo', className: 'font-mono text-[11px] text-slate-500 font-medium' },
-          { data: 'noAduan', className: 'font-semibold' },
-          { data: 'dmaDmz' },
-          { data: 'alamat' },
-          { data: 'kordinat', visible: false },
-          { data: 'maklumatKerosakan', visible: false },
-          { data: 'maklumatKebocoran' },
-          { data: 'jenisPaip' },
-          { data: 'saizPaip' },
-          { data: 'dilaporkanOleh' },
-          { data: 'jenisPengesanan', visible: false },
-          { data: 'zon' },
-          {
-            data: null,
-            className: 'text-center space-x-2',
-            render: function (data, type, row) {
-              const editBtn = `
-                <div class="tooltip-wrap">
-                  <button onclick="openEditModal('${escapeHtml(row.uniqueNo)}')" class="p-2.5 bg-blue-50 text-primary hover:bg-blue-100 rounded-xl transition shadow-sm hover:scale-105">
-                    <i class="fa-solid fa-pencil text-sm"></i>
-                  </button>
-                  <span class="tooltip-text">Edit Rekod</span>
-                </div>`;
-              
-              let mapBtn = '';
-              const parsed = parseCoordinates(row.kordinat);
-              if (parsed.coords) {
-                mapBtn = `
-                  <div class="tooltip-wrap ml-1">
-                    <a href="https://www.google.com/maps?q=${parsed.coords[0]},${parsed.coords[1]}" target="_blank" class="p-2.5 bg-emerald-50 text-success hover:bg-emerald-100 rounded-xl transition shadow-sm hover:scale-105 inline-block">
-                      <i class="fa-solid fa-location-dot text-sm"></i>
-                    </a>
-                    <span class="tooltip-text">Buka Peta</span>
-                  </div>`;
-              }
-
-              const printBtn = `
-                <div class="tooltip-wrap ml-1">
-                  <button onclick="executePrint('${escapeHtml(row.uniqueNo)}')" class="p-2.5 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-xl transition shadow-sm hover:scale-105 inline-block">
-                    <i class="fa-solid fa-print text-sm"></i>
-                  </button>
-                  <span class="tooltip-text">Cetak Borang</span>
-                </div>`;
-
-              return editBtn + mapBtn + printBtn;
+            async request(action, data = {}) {
+                const response = await fetch(CONFIG.API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: action,
+                        internalSecret: CONFIG.SECRET_KEY,
+                        authToken: this.authToken,
+                        userRole: this.userRole,
+                        ...data
+                    })
+                });
+                const result = await response.json();
+                if (!result.success) throw new Error(result.message || 'Ralat komunikasi pelayan');
+                return result;
             }
-          }
-        ]
-      });
 
-      mapInstance = L.map('mapContainer', { preferCanvas: true }).setView([2.7258, 101.9424], 12);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(mapInstance);
-      markerClusterGroup = L.markerClusterGroup({ disableClusteringAtZoom: 16 });
-      mapInstance.addLayer(markerClusterGroup);
-    }
+            async getDashboardData() { return await this.request('getDashboardData'); }
+            async getFilterOptions() { return await this.request('getFilterOptions'); }
+            async getRecordBySerialNo(serialNo) { return await this.request('getRecordBySerialNo', { serialNo }); }
+            async updateRecord(serialNo, recordData) { return await this.request('updateRecord', { serialNo, recordData }); }
+        }
 
-    function escapeHtml(unsafe) {
-      return (unsafe || "").toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-    }
+        const api = new ApiService();
 
-    function updateLockBadgeUI() {
-      const badge = document.getElementById('lockBadge');
-      if (isLockEdit === 'YA') {
-        badge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-red-900/50 text-red-300 border border-red-700';
-        badge.innerHTML = '<i class="fa-solid fa-lock mr-1"></i> Status Kunci: YA (Edit Terhad)';
-      } else {
-        badge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-900/50 text-emerald-300 border border-emerald-700';
-        badge.innerHTML = '<i class="fa-solid fa-lock-open mr-1"></i> Status Kunci: BEBAS';
-      }
-    }
-
-    // ============================================================
-    // FILTER FUNCTIONS
-    // ============================================================
-    let searchTimeout = null;
-    function debouncedSearch() {
-      clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(() => { applyFilters(); }, 300);
-    }
-
-    function populateFilters() {
-      const getUnique = (key) => [...new Set(globalData.map(d => d[key]))].filter(x => x && x !== '-').sort();
-      const zonSet = getUnique('zon');
-      const bulanSet = getUnique('bulan').sort((a,b) => bulanOrder.indexOf(a) - bulanOrder.indexOf(b));
-      const paipSet = getUnique('jenisPaip');
-      const laporSet = getUnique('dilaporkanOleh');
-      const pengesananSet = getUnique('jenisPengesanan');
-      const dmaSet = getUnique('dmaDmz');
-
-      populateSelect('filter-zon', zonSet, 'Semua Zon');
-      populateSelect('filter-bulan', bulanSet, 'Semua Bulan');
-      populateSelect('filter-paip', paipSet, 'Semua Jenis Paip');
-      populateSelect('filter-lapor', laporSet, 'Semua Dilaporkan Oleh');
-      populateSelect('filter-pengesanan', pengesananSet, 'Semua Jenis Pengesanan');
-
-      populateSelect('k-bulan', bulanSet, 'Semua Bulan');
-      populateSelect('k-zon', zonSet, 'Semua Zon');
-      populateSelect('k-dma', dmaSet, 'Semua DMA/DMZ');
-      populateSelect('k-pengesanan', pengesananSet, 'Semua Pengesanan');
-      populateSelect('k-lapor', laporSet, 'Semua Pelapor');
-    }
-
-    function populateSelect(id, list, defaultText) {
-      const el = document.getElementById(id);
-      if(!el) return;
-      const currentVal = el.value;
-      let html = `<option value="">${defaultText}</option>`;
-      list.forEach(item => { html += `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`; });
-      el.innerHTML = html;
-      el.value = currentVal;
-    }
-
-    function applyFilters() {
-      const searchTxt = document.getElementById('filter-search').value.toLowerCase();
-      const zonVal = document.getElementById('filter-zon').value;
-      const bulanVal = document.getElementById('filter-bulan').value;
-      const paipVal = document.getElementById('filter-paip').value;
-      const laporVal = document.getElementById('filter-lapor').value;
-      const pengesananVal = document.getElementById('filter-pengesanan').value;
-
-      filteredData = globalData.filter(item => {
-        const matchZon = !zonVal || item.zon === zonVal;
-        const matchBulan = !bulanVal || item.bulan === bulanVal;
-        const matchPaip = !paipVal || item.jenisPaip === paipVal;
-        const matchLapor = !laporVal || item.dilaporkanOleh === laporVal;
-        const matchPengesanan = !pengesananVal || item.jenisPengesanan === pengesananVal;
-        if (!(matchZon && matchBulan && matchPaip && matchLapor && matchPengesanan)) return false;
-        if (searchTxt) return Object.values(item).some(val => String(val).toLowerCase().includes(searchTxt));
-        return true;
-      });
-
-      renderDashboard();
-    }
-
-    function resetFilters() {
-      document.getElementById('filter-search').value = '';
-      document.getElementById('filter-zon').value = '';
-      document.getElementById('filter-bulan').value = '';
-      document.getElementById('filter-paip').value = '';
-      document.getElementById('filter-lapor').value = '';
-      document.getElementById('filter-pengesanan').value = '';
-      filteredData = [...globalData];
-      renderDashboard();
-    }
-
-    function applyKemaskiniFilters() {
-      const tarikhTxt = document.getElementById('k-tarikh').value.toLowerCase();
-      const bulanVal = document.getElementById('k-bulan').value;
-      const zonVal = document.getElementById('k-zon').value;
-      const dmaVal = document.getElementById('k-dma').value;
-      const pengesananVal = document.getElementById('k-pengesanan').value;
-      const laporVal = document.getElementById('k-lapor').value;
-      const searchTxt = document.getElementById('k-search').value.toLowerCase();
-
-      const chemFiltered = globalData.filter(item => {
-        const matchTarikh = !tarikhTxt || String(item.tarikh).toLowerCase().includes(tarikhTxt);
-        const matchBulan = !bulanVal || item.bulan === bulanVal;
-        const matchZon = !zonVal || item.zon === zonVal;
-        const matchDma = !dmaVal || item.dmaDmz === dmaVal;
-        const matchPengesanan = !pengesananVal || item.jenisPengesanan === pengesananVal;
-        const matchLapor = !laporVal || item.dilaporkanOleh === laporVal;
-        if (!(matchTarikh && matchBulan && matchZon && matchDma && matchPengesanan && matchLapor)) return false;
-        if (searchTxt) return Object.values(item).some(val => String(val).toLowerCase().includes(searchTxt));
-        return true;
-      });
-
-      if (dtKemaskini) dtKemaskini.clear().rows.add(chemFiltered).draw(false);
-    }
-
-    function resetKemaskiniFilters() {
-      document.getElementById('k-tarikh').value = '';
-      document.getElementById('k-bulan').value = '';
-      document.getElementById('k-zon').value = '';
-      document.getElementById('k-dma').value = '';
-      document.getElementById('k-pengesanan').value = '';
-      document.getElementById('k-lapor').value = '';
-      document.getElementById('k-search').value = '';
-      if (dtKemaskini) dtKemaskini.clear().rows.add(globalData).draw(false);
-    }
-
-    function toggleGroupColumns(groupName, btnEl) {
-      if (!dtKemaskini) return;
-      let colIndices = groupName === 'group1' ? [5] : [6, 11];
-      const isVisible = dtKemaskini.column(colIndices[0]).visible();
-      colIndices.forEach(idx => dtKemaskini.column(idx).visible(!isVisible, false));
-      dtKemaskini.draw(false);
-
-      if (!isVisible) {
-        btnEl.classList.remove('bg-slate-100', 'text-slate-700');
-        btnEl.classList.add('bg-primary', 'text-white', 'border-primary');
-        btnEl.innerHTML = `<i class="fa-solid fa-minus mr-1"></i> Tutup ${groupName === 'group1' ? 'Koordinat' : 'Maklumat Tambahan'}`;
-      } else {
-        btnEl.classList.remove('bg-primary', 'text-white', 'border-primary');
-        btnEl.classList.add('bg-slate-100', 'text-slate-700');
-        btnEl.innerHTML = `<i class="fa-solid fa-plus mr-1"></i> ${groupName === 'group1' ? 'Koordinat' : 'Maklumat Tambahan'}`;
-      }
-    }
-
-    // ============================================================
-    // RENDER FUNCTIONS
-    // ============================================================
-    function renderDashboard() {
-      updateKPIs();
-      updateCharts();
-      updateMapMarkers();
-      updateDataTables();
-      applyKemaskiniFilters();
-    }
-
-    function updateKPIs() {
-      document.getElementById('kpi-total').innerText = filteredData.length;
-      document.getElementById('kpi-bulan').innerText = document.getElementById('filter-bulan').value || 'Semua';
-      document.getElementById('kpi-zon').innerText = getTopKey(countFrequency(filteredData, 'zon')) || '-';
-      document.getElementById('kpi-pengesanan').innerText = getTopKey(countFrequency(filteredData, 'jenisPengesanan')) || '-';
-    }
-
-    function countFrequency(dataArray, key) {
-      const counts = {};
-      for (let i = 0; i < dataArray.length; i++) {
-        const val = dataArray[i][key];
-        if (val && val !== '-') counts[val] = (counts[val] || 0) + 1;
-      }
-      return counts;
-    }
-
-    function getTopKey(obj) {
-      let maxVal = 0, topKey = null;
-      for (let key in obj) {
-        if (obj[key] > maxVal) { maxVal = obj[key]; topKey = key; }
-      }
-      return topKey;
-    }
-
-    function createChartInstance(canvasId, type, indexAxisY) {
-      const ctx = document.getElementById(canvasId).getContext('2d');
-      return new Chart(ctx, {
-        type: type,
-        data: { labels: [], datasets: [{ data: [], backgroundColor: CHART_COLORS, borderWidth: 1 }] },
-        options: {
-          responsive: true, maintainAspectRatio: false, indexAxis: indexAxisY ? 'y' : 'x',
-          plugins: { 
-            legend: { display: type === 'pie' || type === 'doughnut', position: 'bottom' },
-            datalabels: {
-              anchor: 'end', align: type === 'pie' || type === 'doughnut' ? 'outside' : (indexAxisY ? 'right' : 'top'),
-              color: '#334155', font: { size: 10, weight: 'bold' },
-              formatter: (value) => value > 0 ? value : ''
+        class Dashboard {
+            constructor() {
+                this.records = [];
+                this.filterOptions = {};
+                this.filteredRecords = [];
+                this.charts = {};
+                this.planTableData = [];
+                this.filters = { bulan: '', personel: '', jenis: '', kategori: '', zon: '', search: '' };
+                this.rumusanFilters = { bulan: '', personel: '', jenis: '', kategori: '', zon: '' };
+                this.currentPrintSerialNo = '';
+                this.init();
             }
-          },
-          onClick: (e, activeEls) => {
-            if (activeEls.length === 0) return;
-            const label = chartsCache[canvasId].data.labels[activeEls[0].index];
-            const filterMap = { 'chartZon': 'filter-zon', 'chartBulan': 'filter-bulan', 'chartPaip': 'filter-paip', 'chartLapor': 'filter-lapor', 'chartPengesanan': 'filter-pengesanan' };
-            if (filterMap[canvasId]) {
-              document.getElementById(filterMap[canvasId]).value = label;
-              applyFilters();
+
+            async init() {
+                this.bindEvents();
+                this.initTheme();
+                setTimeout(() => document.getElementById('opening-animation').classList.add('hidden'), 2000);
+                this.updateAuthUI();
+                try {
+                    await this.loadData();
+                    this.initCharts();
+                    this.updateDashboard();
+                } catch (error) {
+                    this.showToast(error.message, 'error');
+                }
             }
-          }
-        },
-        plugins: [ChartDataLabels]
-      });
-    }
 
-    function updateCharts() {
-      mutateChartData('chartBulan', countFrequency(filteredData, 'bulan'), bulanOrder);
-      mutateChartData('chartPengesanan', countFrequency(filteredData, 'jenisPengesanan'));
-      mutateChartData('chartPaip', countFrequency(filteredData, 'jenisPaip'));
-      mutateChartData('chartLapor', countFrequency(filteredData, 'dilaporkanOleh'));
-      mutateChartData('chartZon', countFrequency(filteredData, 'zon'));
-    }
+            initTheme() {
+                if (localStorage.getItem('prv-alt-theme') === 'night') {
+                    document.documentElement.setAttribute('data-theme', 'night');
+                }
+            }
 
-    function mutateChartData(chartId, countsObj, customOrder = null) {
-      const chart = chartsCache[chartId];
-      let labels = Object.keys(countsObj);
-      if (customOrder) labels.sort((a,b) => customOrder.indexOf(a) - customOrder.indexOf(b));
-      else labels.sort((a,b) => countsObj[b] - countsObj[a]);
-      chart.data.labels = labels;
-      chart.data.datasets[0].data = labels.map(l => countsObj[l]);
-      chart.update();
-    }
+            bindEvents() {
+                document.getElementById('tab-rumusan').addEventListener('click', () => this.switchTab('rumusan'));
+                document.getElementById('tab-kemaskini').addEventListener('click', () => this.switchTab('kemaskini'));
+                document.getElementById('refresh-btn').addEventListener('click', () => this.refreshData());
+                document.getElementById('theme-toggle').addEventListener('click', () => {
+                    const night = document.documentElement.getAttribute('data-theme') === 'night';
+                    document.documentElement.setAttribute('data-theme', night ? 'light' : 'night');
+                    localStorage.setItem('prv-alt-theme', night ? 'light' : 'night');
+                });
 
-    function updateMapMarkers() {
-      if (!markerClusterGroup || !mapInstance) return;
-      markerClusterGroup.clearLayers();
-      const bounds = [];
+                ['bulan', 'personel', 'jenis', 'kategori', 'zon'].forEach(id => {
+                    document.getElementById(`filter-${id}`).addEventListener('change', e => {
+                        this.filters[id] = e.target.value;
+                        this.applyFilters();
+                    });
 
-      for (let i = 0; i < filteredData.length; i++) {
-        const item = filteredData[i];
-        const parsed = parseCoordinates(item.kordinat);
-        if (!parsed.coords) continue;
-        bounds.push(parsed.coords);
-        const popupHtml = `<div class="p-2 text-xs"><b>Aduan:</b> ${escapeHtml(item.noAduan)}<br><b>Zon:</b> ${escapeHtml(item.zon)}<br><b>Alamat:</b> ${escapeHtml(item.alamat)}</div>`;
-        markerClusterGroup.addLayer(L.marker(parsed.coords).bindPopup(popupHtml));
-      }
+                    const rumusanEl = document.getElementById(`rumusan-${id}`);
+                    if(rumusanEl) {
+                        rumusanEl.addEventListener('change', e => {
+                            this.rumusanFilters[id] = e.target.value;
+                            this.updateDashboardCharts();
+                        });
+                    }
+                });
 
-      setTimeout(() => {
-        if (mapInstance) {
-          mapInstance.invalidateSize();
-          if (bounds.length > 0) mapInstance.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
-          else mapInstance.setView([2.7258, 101.9424], 12);
+                document.getElementById('filter-search').addEventListener('input', e => {
+                    this.filters.search = e.target.value.toLowerCase().trim();
+                    this.applyFilters();
+                });
+
+                document.getElementById('modal-close').addEventListener('click', () => this.closeModal());
+                document.getElementById('modal-cancel-btn').addEventListener('click', () => this.closeModal());
+                document.getElementById('modal-save-btn').addEventListener('click', () => this.saveRecord());
+            }
+
+            switchTab(tab) {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById(`tab-${tab}`).classList.add('active');
+                document.getElementById(`content-${tab}`).classList.add('active');
+            }
+
+            async loadData() {
+                const [dashRes, filterRes] = await Promise.all([
+                    api.getDashboardData(),
+                    api.getFilterOptions()
+                ]);
+                this.records = dashRes.data.records || [];
+                this.planTableData = dashRes.data.planTable || [];
+                this.filterOptions = filterRes.data || {};
+                this.filteredRecords = [...this.records];
+                
+                if (dashRes.data.lastSync) {
+                    document.getElementById('last-updated').textContent = `Last Updated: ${new Date(dashRes.data.lastSync).toLocaleString()}`;
+                }
+                this.populateDropdowns();
+            }
+
+            async refreshData() {
+                await this.loadData();
+                this.updateDashboard();
+                this.showToast('Data berjaya dikemaskini', 'success');
+            }
+
+            populateDropdowns() {
+                const pop = (id, list) => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    const val = el.value;
+                    el.innerHTML = `<option value="">Semua</option>` + (list || []).map(i => `<option value="${i}">${i}</option>`).join('');
+                    el.value = val;
+                };
+
+                pop('filter-bulan', this.filterOptions.bulans);
+                pop('filter-personel', this.filterOptions.personels);
+                pop('filter-jenis', this.filterOptions.jenisPenyelenggaraan);
+                pop('filter-kategori', this.filterOptions.kategoriPenyelenggaraan);
+                pop('filter-zon', ['1', '2']);
+
+                pop('rumusan-bulan', this.filterOptions.bulans);
+                pop('rumusan-personel', this.filterOptions.personels);
+                pop('rumusan-jenis', this.filterOptions.jenisPenyelenggaraan);
+                pop('rumusan-kategori', this.filterOptions.kategoriPenyelenggaraan);
+                pop('rumusan-zon', ['1', '2']);
+            }
+
+            applyFilters() {
+                this.filteredRecords = this.records.filter(r => {
+                    if (this.filters.bulan && r.bulan !== this.filters.bulan) return false;
+                    if (this.filters.personel && r.dilaksanakanOleh !== this.filters.personel) return false;
+                    if (this.filters.jenis && r.jenisPenyelenggaraan !== this.filters.jenis) return false;
+                    if (this.filters.kategori && r.kategoriPenyelenggaraan !== this.filters.kategori) return false;
+                    if (this.filters.zon && r.zon !== this.filters.zon) return false;
+                    if (this.filters.search) {
+                        const s = this.filters.search;
+                        if (!r.serialNo.toLowerCase().includes(s) && !r.lokasi.toLowerCase().includes(s)) return false;
+                    }
+                    return true;
+                });
+                this.updateTable();
+            }
+
+            updateDashboard() {
+                this.updateDashboardCharts();
+                this.updateTable();
+            }
+
+            updateDashboardCharts() {
+                let filtered = this.records.filter(r => {
+                    if (this.rumusanFilters.bulan && r.bulan !== this.rumusanFilters.bulan) return false;
+                    if (this.rumusanFilters.personel && r.dilaksanakanOleh !== this.rumusanFilters.personel) return false;
+                    if (this.rumusanFilters.jenis && r.jenisPenyelenggaraan !== this.rumusanFilters.jenis) return false;
+                    if (this.rumusanFilters.kategori && r.kategoriPenyelenggaraan !== this.rumusanFilters.kategori) return false;
+                    if (this.rumusanFilters.zon && r.zon !== this.rumusanFilters.zon) return false;
+                    return true;
+                });
+                this.updateKPIs(filtered);
+                this.updateCharts(filtered);
+                this.renderPlanTable();
+            }
+
+            updateKPIs(dataRecords) {
+                const t = dataRecords.length;
+                const prv = dataRecords.filter(r => r.jenisPenyelenggaraan === 'PRV').length;
+                const alt = dataRecords.filter(r => r.jenisPenyelenggaraan === 'ALTITUDE').length;
+                const b = dataRecords.filter(r => r.kategoriPenyelenggaraan === 'BERJADUAL').length;
+                const tb = dataRecords.filter(r => r.kategoriPenyelenggaraan === 'TIDAK BERJADUAL').length;
+
+                document.getElementById('kpi-grid').innerHTML = `
+                    <div class="kpi-card"><div class="kpi-value">${t}</div><div class="kpi-label">JUMLAH</div></div>
+                    <div class="kpi-card"><div class="kpi-value">${prv}</div><div class="kpi-label">PRV</div></div>
+                    <div class="kpi-card"><div class="kpi-value">${alt}</div><div class="kpi-label">ALTITUDE</div></div>
+                    <div class="kpi-card"><div class="kpi-value">${b}</div><div class="kpi-label">BERJADUAL</div></div>
+                    <div class="kpi-card"><div class="kpi-value">${tb}</div><div class="kpi-label">TIDAK BERJADUAL</div></div>
+                `;
+            }
+
+            initCharts() {
+                ['bulan', 'jenis', 'kategori', 'zon', 'personel'].forEach(type => {
+                    const ctx = document.getElementById(`chart-${type}`).getContext('2d');
+                    const isBar = type !== 'jenis' && type !== 'kategori';
+
+                    this.charts[type] = new Chart(ctx, {
+                        type: type === 'jenis' ? 'doughnut' : type === 'kategori' ? 'pie' : 'bar',
+                        data: { 
+                            labels: [], 
+                            datasets: [{ 
+                                label: isBar ? 'Jumlah' : '',
+                                data: [], 
+                                backgroundColor: ['#006994', '#00b3b3', '#008080', '#f59e0b', '#3b82f6', '#10b981'] 
+                            }] 
+                        },
+                        options: { 
+                            responsive: true, 
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: !isBar }
+                            }
+                        }
+                    });
+                });
+            }
+
+            updateCharts(dataRecords) {
+                const count = (key) => {
+                    const map = {};
+                    dataRecords.forEach(r => { if (r[key]) map[r[key]] = (map[r[key]] || 0) + 1; });
+                    return map;
+                };
+                const update = (type, map) => {
+                    this.charts[type].data.labels = Object.keys(map);
+                    this.charts[type].data.datasets[0].data = Object.values(map);
+                    this.charts[type].update();
+                };
+                update('bulan', count('bulan'));
+                update('jenis', count('jenisPenyelenggaraan'));
+                update('kategori', count('kategoriPenyelenggaraan'));
+                update('zon', count('zon'));
+                update('personel', count('dilaksanakanOleh'));
+            }
+
+            renderPlanTable() {
+                const tbody = document.getElementById('plan-table-body');
+                if (!tbody) return;
+                
+                if (!this.planTableData || this.planTableData.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">Tiada rekod PLAN TABLE ditemui</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = this.planTableData.map(r => `
+                    <tr>
+                        <td><strong>${r.bulan}</strong></td>
+                        <td style="color: var(--primary-blue); font-weight: 600;">${r.planPrv}</td>
+                        <td>${r.prv}</td>
+                        <td style="color: var(--teal); font-weight: 600;">${r.planAlt}</td>
+                        <td>${r.alt}</td>
+                    </tr>
+                `).join('');
+            }
+
+            updateTable() {
+                const tbody = document.getElementById('table-body');
+                const emptyState = document.getElementById('empty-state');
+                
+                if (this.filteredRecords.length === 0) {
+                    tbody.innerHTML = '';
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+                emptyState.classList.add('hidden');
+
+                tbody.innerHTML = this.filteredRecords.map(r => `
+                    <tr>
+                        <td><strong>${r.serialNo}</strong></td>
+                        <td>${r.tarikh}</td>
+                        <td>${r.masaMula}</td>
+                        <td>${r.masaSiap}</td>
+                        <td>${r.dilaksanakanOleh}</td>
+                        <td>${r.lokasi}</td>
+                        <td>${r.jenisPenyelenggaraan}</td>
+                        <td>${r.saiz}</td>
+                        <td>${r.kategoriPenyelenggaraan}</td>
+                        <td>${r.zon}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-action btn-update" onclick="dashboard.openModal('${r.serialNo}')">Kemaskini</button>
+                                <button class="btn-action btn-print" onclick="dashboard.openPrintModal('${r.serialNo}')">Cetak</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            async openPrintModal(serialNo) {
+                try {
+                    this.showToast('Memuatkan data borang...', 'loading');
+
+                    const res = await api.getRecordBySerialNo(serialNo);
+                    const r = res.data.record;
+                    this.currentPrintSerialNo = r.serialNo;
+
+                    // Masukkan data terus ke elemen placeholder di atas imej JPEG bersih
+                    document.getElementById('pf-lokasi').innerText = r.lokasi || '';
+                    document.getElementById('pf-zon').innerText = r.zon || '';
+                    document.getElementById('pf-jenis').innerText = r.jenisPenyelenggaraan || '';
+                    document.getElementById('pf-tarikh').innerText = r.tarikh || '';
+                    document.getElementById('pf-masaMula').innerText = r.masaMula || '';
+                    document.getElementById('pf-masaSiap').innerText = r.masaSiap || '';
+                    document.getElementById('pf-dilaksanakan').innerText = r.dilaksanakanOleh || '';
+                    
+                    const saizStr = r.saiz || '';
+                    document.getElementById('pf-saiz').innerText = saizStr ? saizStr + ' inch' : '';
+                    document.getElementById('pf-tindakan').innerText = r.tindakanUlasan || '';
+
+                    document.getElementById('print-modal').classList.remove('hidden');
+                    this.showToast('Pratonton sedia untuk dicetak', 'success');
+
+                } catch (error) {
+                    this.showToast(error.message, 'error');
+                }
+            }
+
+            closePrintModal() {
+                document.getElementById('print-modal').classList.add('hidden');
+            }
+
+            downloadPDF() {
+                this.showToast('Menjana PDF Berkualiti Tinggi...', 'loading');
+                const element = document.getElementById('print-preview-content');
+                
+                const opt = {
+                    margin:       0, 
+                    filename:     `Borang_PRV_ALT_${this.currentPrintSerialNo}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'px', format: [794, 1123], orientation: 'portrait' }
+                };
+
+                html2pdf().set(opt).from(element).save().then(() => {
+                    this.showToast('PDF berjaya dimuat turun!', 'success');
+                }).catch(() => {
+                    this.showToast('Gagal menjana PDF', 'error');
+                });
+            }
+
+            async openModal(serialNo) {
+                const res = await api.getRecordBySerialNo(serialNo);
+                const r = res.data.record;
+                document.getElementById('serial-no').value = r.serialNo;
+                document.getElementById('modal-tarikh').value = r.tarikh.split('/').reverse().join('-');
+                document.getElementById('modal-masa-mula').value = r.masaMula;
+                document.getElementById('modal-masa-siap').value = r.masaSiap;
+                document.getElementById('modal-lokasi').value = r.lokasi;
+                document.getElementById('modal-tindakan').value = r.tindakanUlasan;
+
+                const pSel = document.getElementById('modal-pelaksana');
+                pSel.innerHTML = (this.filterOptions.personels || []).map(p => `<option value="${p}">${p}</option>`).join('');
+                pSel.value = r.dilaksanakanOleh;
+
+                const sSel = document.getElementById('modal-saiz');
+                sSel.innerHTML = (this.filterOptions.saizList || ['DN100', 'DN150']).load ? '' : (this.filterOptions.saizList || ['DN100', 'DN150']).map(s => `<option value="${s}">${s}</option>`).join('');
+                sSel.value = r.saiz;
+
+                document.getElementById('modal-jenis').value = r.jenisPenyelenggaraan;
+                document.getElementById('modal-kategori').value = r.kategoriPenyelenggaraan;
+                document.getElementById('modal-zon').value = r.zon;
+
+                document.getElementById('update-modal').classList.remove('hidden');
+            }
+
+            closeModal() {
+                document.getElementById('update-modal').classList.add('hidden');
+            }
+
+            async saveRecord() {
+                const serialNo = document.getElementById('serial-no').value;
+                const data = {
+                    tarikh: document.getElementById('modal-tarikh').value,
+                    masaMula: document.getElementById('modal-masa-mula').value,
+                    masaSiap: document.getElementById('modal-masa-siap').value,
+                    dilaksanakanOleh: document.getElementById('modal-pelaksana').value,
+                    lokasi: document.getElementById('modal-lokasi').value,
+                    jenisPenyelenggaraan: document.getElementById('modal-jenis').value,
+                    saiz: document.getElementById('modal-saiz').value,
+                    kategoriPenyelenggaraan: document.getElementById('modal-kategori').value,
+                    zon: document.getElementById('modal-zon').value,
+                    tindakanUlasan: document.getElementById('modal-tindakan').value
+                };
+                try {
+                    await api.updateRecord(serialNo, data);
+                    this.showToast('Rekod berjaya dikemaskini', 'success');
+                    this.closeModal();
+                    await this.loadData();
+                    this.updateDashboard();
+                } catch (e) {
+                    this.showToast(e.message, 'error');
+                }
+            }
+
+            updateAuthUI() {
+                document.getElementById('username-display').textContent = localStorage.getItem('USERNAME') || 'User';
+                const role = localStorage.getItem('USER_ROLE') || 'USER';
+                const badge = document.getElementById('role-badge-display');
+                badge.textContent = role;
+                if (role.includes('ADMIN')) badge.classList.add('admin');
+            }
+
+            showToast(msg, type = 'success') {
+                const t = document.createElement('div');
+                t.className = `toast ${type}`;
+                t.textContent = msg;
+                document.body.appendChild(t);
+                setTimeout(() => t.remove(), 3000);
+            }
         }
-      }, 300);
-    }
 
-    function updateDataTables() {
-      if (dtRumusan) dtRumusan.clear().rows.add(filteredData).draw(false);
-    }
-
-    // ============================================================
-    // EDIT FUNCTIONS
-    // ============================================================
-    function openEditModal(uniqueNo) {
-      const item = globalData.find(d => d.uniqueNo === uniqueNo);
-      if (!item) return showToast('Rekod tidak dijumpai.', 'danger');
-
-      document.getElementById('edit-uniqueNo').value = item.uniqueNo;
-      document.getElementById('modalUniqueNoText').innerText = `Unique No: ${item.uniqueNo}`;
-      
-      const fields = ['tarikh', 'noAduan', 'dilaporkanOleh', 'zon', 'dmaDmz', 'alamat', 'kordinat', 'maklumatKerosakan', 'maklumatKebocoran', 'jenisPaip', 'saizPaip', 'jenisPengesanan'];
-      fields.forEach(f => {
-        const el = document.getElementById(`edit-${f}`);
-        if(el) el.value = item[f] === '-' ? '' : item[f];
-      });
-
-      document.getElementById('editModal').classList.remove('hidden');
-    }
-
-    function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
-
-    let confirmCallback = null;
-    function confirmUpdate() {
-      if (!document.getElementById('edit-noAduan').value.trim()) return showToast('No Aduan tidak boleh kosong.', 'danger');
-      document.getElementById('customConfirmModal').classList.remove('hidden');
-      confirmCallback = (isConfirmed) => { if (isConfirmed) submitUpdateToServer(); };
-    }
-
-    function closeCustomConfirm(result) {
-      document.getElementById('customConfirmModal').classList.add('hidden');
-      if (confirmCallback) { confirmCallback(result); confirmCallback = null; }
-    }
-
-    async function submitUpdateToServer() {
-      const formData = {
-        uniqueNo: document.getElementById('edit-uniqueNo').value,
-        tarikh: document.getElementById('edit-tarikh').value,
-        noAduan: document.getElementById('edit-noAduan').value.trim(),
-        dilaporkanOleh: document.getElementById('edit-dilaporkanOleh').value,
-        zon: document.getElementById('edit-zon').value,
-        dmaDmz: document.getElementById('edit-dmaDmz').value,
-        alamat: document.getElementById('edit-alamat').value,
-        kordinat: document.getElementById('edit-kordinat').value,
-        maklumatKerosakan: document.getElementById('edit-maklumatKerosakan').value,
-        maklumatKebocoran: document.getElementById('edit-maklumatKebocoran').value,
-        jenisPaip: document.getElementById('edit-jenisPaip').value,
-        saizPaip: document.getElementById('edit-saizPaip').value,
-        jenisPengesanan: document.getElementById('edit-jenisPengesanan').value,
-        bulan: "-"
-      };
-
-      if(formData.tarikh) {
-         try {
-           const dt = new Date(formData.tarikh);
-           if(!isNaN(dt)) formData.bulan = bulanOrder[dt.getMonth()];
-         } catch(e){}
-      }
-
-      showLoading(true);
-      closeEditModal();
-
-      try {
-        if (!checkSessionExpiry()) {
-          window.location.replace('./index.html?expired=true');
-          return;
-        }
-        const response = await secureFetch(CF_WORKER_URL, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json', 
-            'Authorization': 'Bearer ' + sessionStorage.getItem('pd_water_auth_token') 
-          },
-          body: JSON.stringify({ action: 'updateRecord', data: formData })
-        });
-        const res = await response.json();
-        if (res.success) {
-          showToast(res.message, 'success');
-          await loadData();
-        } else {
-          showLoading(false);
-          showToast(res.message, 'danger');
-        }
-      } catch (err) {
-        showLoading(false);
-        if (err.message === 'Session expired') {
-          window.location.replace('./index.html?expired=true');
-        } else {
-          showToast('Kemaskini gagal: ' + err.message, 'danger');
-        }
-      }
-    }
-
-    // ============================================================
-    // PRINT FUNCTION (BORANG BERSIH PRV / ALT)
-    // ============================================================
-    async function executePrint(uniqueNo) {
-      const uNo = uniqueNo || document.getElementById('edit-uniqueNo').value;
-      if (!uNo) return showToast('Sila pilih atau buka rekod untuk dicetak.', 'danger');
-
-      const item = globalData.find(d => d.uniqueNo === uNo);
-      if (!item) return showToast('Rekod tidak dijumpai.', 'danger');
-
-      // Masukkan Teks Asas ke Kotak Overlay berdasarkan Borang PRV ALT Bersih
-      document.getElementById('pf-lokasi').innerText = item.alamat !== '-' ? item.alamat : '';
-      document.getElementById('pf-zon').innerText = item.zon !== '-' ? item.zon : (item.dmaDmz !== '-' ? item.dmaDmz : '');
-      document.getElementById('pf-jenis').innerText = item.jenisPengesanan !== '-' ? item.jenisPengesanan : ''; 
-      document.getElementById('pf-tarikh').innerText = item.tarikh !== '-' ? item.tarikh : '';
-      
-      // Masa Mula & Masa Siap dikosongkan sekiranya tiada dalam database
-      document.getElementById('pf-masaMula').innerText = ''; 
-      document.getElementById('pf-masaSiap').innerText = ''; 
-      
-      document.getElementById('pf-dilaksanakan').innerText = item.dilaporkanOleh !== '-' ? item.dilaporkanOleh : '';
-      
-      const saizStr = item.saizPaip !== '-' ? item.saizPaip : '';
-      document.getElementById('pf-saiz').innerText = saizStr ? saizStr + ' inch' : '';
-      
-      document.getElementById('pf-tindakan').innerText = item.maklumatKebocoran !== '-' ? item.maklumatKebocoran : (item.maklumatKerosakan !== '-' ? item.maklumatKerosakan : '');
-
-      window.currentPrintUniqueNo = uNo;
-
-      // Buka Modal Print Preview
-      document.getElementById('printModal').classList.remove('hidden');
-    }
-
-    function closePrintModal() {
-      document.getElementById('printModal').classList.add('hidden');
-    }
-
-    function downloadPDF() {
-      showLoading(true, "Menjana PDF Berkualiti Tinggi...");
-      const element = document.getElementById('borangContainer');
-      
-      const opt = {
-          margin:       0, 
-          filename:     `Borang_PRV_ALT_${window.currentPrintUniqueNo}.pdf`,
-          image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 2, useCORS: true },
-          jsPDF:        { unit: 'px', format: [794, 1123], orientation: 'portrait' }
-      };
-
-      html2pdf().set(opt).from(element).save().then(() => {
-          showLoading(false);
-          showToast('PDF berjaya dimuat turun!', 'success');
-      }).catch((err) => {
-          showLoading(false);
-          showToast('Gagal menjana PDF', 'danger');
-      });
-    }
-
-    // ============================================================
-    // NAVIGATION & UTILITY FUNCTIONS
-    // ============================================================
-    function switchTab(tabName) {
-      document.querySelectorAll('header nav button:not(#nav-logout)').forEach(btn => {
-        btn.classList.remove('active', 'bg-primary', 'text-white');
-        btn.classList.add('bg-slate-800/80', 'text-slate-300');
-      });
-      const activeBtn = document.getElementById('nav-' + tabName);
-      if(activeBtn) {
-        activeBtn.classList.remove('bg-slate-800/80', 'text-slate-300');
-        activeBtn.classList.add('active', 'bg-primary', 'text-white');
-      }
-
-      if (tabName === 'rumusan') {
-        document.getElementById('tab-rumusan').classList.remove('hidden');
-        document.getElementById('tab-kemaskini').classList.add('hidden');
-        setTimeout(() => { if (mapInstance) { mapInstance.invalidateSize(); updateMapMarkers(); } }, 200);
-      } else {
-        document.getElementById('tab-rumusan').classList.add('hidden');
-        document.getElementById('tab-kemaskini').classList.remove('hidden');
-        if (dtKemaskini) dtKemaskini.columns.adjust().draw();
-      }
-    }
-
-    function showLoading(show, message = "Loading...") {
-      const overlay = document.getElementById('loadingOverlay');
-      if (show) {
-        overlay.classList.remove('hidden');
-        const msgEl = overlay.querySelector('p');
-        if (msgEl) msgEl.textContent = message;
-      } else {
-        overlay.classList.add('hidden');
-      }
-    }
-
-    let toastTimer = null;
-    function showToast(message, type = 'success') {
-      const toast = document.getElementById('toast');
-      clearTimeout(toastTimer);
-      document.getElementById('toastMessage').innerText = message;
-      document.getElementById('toastIcon').className = type === 'success' ? 'fa-solid fa-circle-check text-base' : 'fa-solid fa-circle-exclamation text-base';
-      toast.className = `fixed bottom-6 right-6 z-50 transform translate-y-0 opacity-100 transition-all duration-300 flex items-center space-x-3 px-5 py-3 rounded-2xl shadow-xl text-white font-medium text-xs ${type === 'success' ? 'bg-success' : 'bg-danger'}`;
-      toastTimer = setTimeout(() => { toast.className = 'fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-3 px-5 py-3 rounded-2xl shadow-xl text-white font-medium text-xs'; }, 3500);
-    }
-
-    async function refreshData() {
-      const btnIcon = document.querySelector('button[onclick="refreshData()"] i');
-      if(btnIcon) btnIcon.classList.add('fa-spin');
-      await loadData();
-      if(btnIcon) btnIcon.classList.remove('fa-spin');
-    }
-  </script>
+        const dashboard = new Dashboard();
+    </script>
 </body>
 </html>
