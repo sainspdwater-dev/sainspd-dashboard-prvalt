@@ -695,13 +695,51 @@
             background: transparent;
         }
 
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+
         @media print {
+            body, html {
+                width: 794px;
+                height: 1123px;
+                overflow: hidden;
+                background: white;
+            }
             body * { visibility: hidden; }
             #print-modal, #print-modal * { visibility: visible; }
-            #print-modal { position: absolute; left: 0; top: 0; margin: 0; padding: 0; background: white; border: none; box-shadow: none; }
+            #print-modal { 
+                position: fixed; 
+                left: 0; 
+                top: 0; 
+                margin: 0; 
+                padding: 0; 
+                background: white; 
+                border: none; 
+                box-shadow: none; 
+                width: 794px !important; 
+                height: 1123px !important; 
+                overflow: hidden;
+            }
             .modal-header-print { display: none !important; }
-            .a4-container { box-shadow: none; margin: 0; border: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .form-field, .form-textarea { border: none !important; background: transparent !important; }
+            .modal-body { 
+                padding: 0 !important; 
+                background: white !important; 
+                overflow: hidden !important;
+            }
+            .a4-container { 
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                box-shadow: none !important; 
+                margin: 0 !important; 
+                border: none !important; 
+                width: 794px !important;
+                height: 1123px !important;
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+            }
         }
     </style>
 </head>
@@ -1362,23 +1400,23 @@
 
             downloadPDF() {
                 this.showToast('Menjana PDF Berkualiti Tinggi...', 'loading');
-                const element = document.getElementById('print-preview-content');
+                const element = document.getElementById('print-preview-content'); // atau 'borangContainer' mengikut HTML anda
                 
-                // Simpan gaya asal
+                // Simpan gaya asal jika perlu
                 const originalShadow = element.style.boxShadow;
                 const originalMargin = element.style.margin;
                 
-                // Buang sementara shadow dan margin untuk elak ruang kosong dalam PDF
                 element.style.boxShadow = 'none';
                 element.style.margin = '0';
                 
                 const opt = {
                     margin:       0, 
                     filename:     `Borang_PRV_ALT_${this.currentPrintSerialNo}.pdf`,
-                    image:        { type: 'png', quality: 1 },
+                    image:        { type: 'jpeg', quality: 1.0 }, // Tetapkan kualiti maksimum (1.0)
                     html2canvas:  { 
-                        scale: 3, 
-                        useCORS: true,
+                        scale: 3,            // Skala 3 untuk ketajaman maksimum (seperti sistem ALD)
+                        useCORS: true, 
+                        letterRendering: true,
                         scrollY: 0,
                         windowWidth: document.documentElement.clientWidth
                     },
@@ -1386,11 +1424,10 @@
                 };
 
                 html2pdf().set(opt).from(element).save().then(() => {
-                    // Kembalikan gaya asal selepas selesai
                     element.style.boxShadow = originalShadow;
                     element.style.margin = originalMargin;
                     this.showToast('PDF berjaya dimuat turun!', 'success');
-                }).catch(() => {
+                }).catch((err) => {
                     element.style.boxShadow = originalShadow;
                     element.style.margin = originalMargin;
                     this.showToast('Gagal menjana PDF', 'error');
