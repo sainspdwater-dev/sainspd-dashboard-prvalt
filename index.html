@@ -1364,17 +1364,35 @@
                 this.showToast('Menjana PDF Berkualiti Tinggi...', 'loading');
                 const element = document.getElementById('print-preview-content');
                 
+                // Simpan gaya asal
+                const originalShadow = element.style.boxShadow;
+                const originalMargin = element.style.margin;
+                
+                // Buang sementara shadow dan margin untuk elak ruang kosong dalam PDF
+                element.style.boxShadow = 'none';
+                element.style.margin = '0';
+                
                 const opt = {
                     margin:       0, 
                     filename:     `Borang_PRV_ALT_${this.currentPrintSerialNo}.pdf`,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true },
+                    html2canvas:  { 
+                        scale: 2, 
+                        useCORS: true,
+                        scrollY: 0,
+                        windowWidth: document.documentElement.clientWidth
+                    },
                     jsPDF:        { unit: 'px', format: [794, 1123], orientation: 'portrait' }
                 };
 
                 html2pdf().set(opt).from(element).save().then(() => {
+                    // Kembalikan gaya asal selepas selesai
+                    element.style.boxShadow = originalShadow;
+                    element.style.margin = originalMargin;
                     this.showToast('PDF berjaya dimuat turun!', 'success');
                 }).catch(() => {
+                    element.style.boxShadow = originalShadow;
+                    element.style.margin = originalMargin;
                     this.showToast('Gagal menjana PDF', 'error');
                 });
             }
