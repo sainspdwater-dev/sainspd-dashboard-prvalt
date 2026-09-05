@@ -656,9 +656,6 @@
         .toast.success { border-left-color: var(--success-color); }
         .toast.error { border-left-color: var(--danger-color); }
 
-        /* ==========================================
-           CSS KONTENA A4 & PLACEHOLDER JPEG BERSIH
-           ========================================== */
         .a4-container {
             width: 794px; 
             height: 1123px; 
@@ -679,7 +676,7 @@
             font-size: 11px; 
             font-weight: bold; 
             color: black; 
-            border: none; /* Tukar ke 'none' apabila kedudukan sudah diselaraskan */
+            border: none;
             background: transparent; 
         }
         
@@ -691,7 +688,7 @@
             word-wrap: break-word; 
             white-space: pre-line; 
             line-height: 2.3;
-            border: none; /* Tukar ke 'none' apabila kedudukan sudah diselaraskan */
+            border: none;
             background: transparent;
         }
 
@@ -747,9 +744,7 @@
     <script>
         (function() {
             const CONFIG = {
-                SECRET_KEY: 'PRV_ALT_SAINSPD_2026_SECURE',
                 API_URL: 'https://dashboardprvalt.sainspdwater.workers.dev/',
-                GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxYkicFTwbjWSXb-jxuGWiENQTQtQBXMJ1pNEQdbHyzawqqdMrLv1DD17rxuIXPSJNU/exec',
                 TIMEOUT: 30000,
                 MAX_SESSION_LIMIT: 60 * 60 * 1000
             };
@@ -1016,7 +1011,7 @@
         </div>
     </div>
 
-    <!-- Print Preview Modal (JPEG Definisi Tinggi + Overlay Placeholder) -->
+    <!-- Print Preview Modal -->
     <div id="print-modal" class="modal hidden">
         <div class="modal-content" style="max-width: 950px; width: 95%; max-height: 95vh; background: #f5f7fa; display: flex; flex-direction: column;">
             <div class="modal-header modal-header-print" style="background: var(--primary-blue); color: white;">
@@ -1033,23 +1028,14 @@
             </div>
             <div class="modal-body" style="padding: 20px; overflow-y: auto; flex: 1; display: flex; justify-content: center; background: #e2e8f0;">
                 
-                <!-- KONTENA A4 DENGAN LATAR BELAKANG BORANG BERSIH JPEG -->
                 <div id="print-preview-content" class="a4-container">
-                    <!-- Data Asas & Lokasi -->
                     <div id="pf-lokasi" class="form-field" style="top: 102px; left: 160px; width: 330px;"></div>
                     <div id="pf-zon" class="form-field" style="top: 102px; left: 615px; width: 150px;"></div>
-                    
-                    <!-- 1.0 Jenis Kerja -->
                     <div id="pf-jenis" class="form-field" style="top: 185.7px; left: 591.4px; width: 170px;"></div>
-                    
-                    <!-- 2.0 Maklumat Kerja -->
                     <div id="pf-tarikh" class="form-field" style="top: 255.4px; left: 133.9px; width: 130px;"></div>
                     <div id="pf-masaMula" class="form-field" style="top: 256.4px; left: 389.8px; width: 100px;"></div>
                     <div id="pf-masaSiap" class="form-field" style="top: 256.4px; left: 608.4px; width: 100px;"></div>
-                    
                     <div id="pf-dilaksanakan" class="form-field" style="top: 288.6px; left: 475px; width: 220px;"></div>
-                    
-                    <!-- 4.0 Tindakan / Ulasan -->
                     <div id="pf-saiz" class="form-field" style="top: 739.3px; left: 93.6px; width: 260px;"></div>
                     <div id="pf-tindakan" class="form-textarea" style="top: 764.8px; left: 93.6px; width: 240px;"></div>
                 </div>
@@ -1060,9 +1046,7 @@
 
     <script>
         const CONFIG = {
-            SECRET_KEY: 'PRV_ALT_SAINSPD_2026_SECURE',
             API_URL: 'https://dashboardprvalt.sainspdwater.workers.dev/',
-            GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxYkicFTwbjWSXb-jxuGWiENQTQtQBXMJ1pNEQdbHyzawqqdMrLv1DD17rxuIXPSJNU/exec',
             TIMEOUT: 30000,
             DEBOUNCE_DELAY: 300
         };
@@ -1079,7 +1063,6 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: action,
-                        internalSecret: CONFIG.SECRET_KEY,
                         authToken: this.authToken,
                         userRole: this.userRole,
                         ...data
@@ -1373,7 +1356,6 @@
                     const r = res.data.record;
                     this.currentPrintSerialNo = r.serialNo;
 
-                    // Masukkan data terus ke elemen placeholder di atas imej JPEG bersih
                     document.getElementById('pf-lokasi').innerText = r.lokasi || '';
                     document.getElementById('pf-zon').innerText = r.zon || '';
                     document.getElementById('pf-jenis').innerText = r.jenisPenyelenggaraan || '';
@@ -1400,9 +1382,8 @@
 
             downloadPDF() {
                 this.showToast('Menjana PDF Berkualiti Tinggi...', 'loading');
-                const element = document.getElementById('print-preview-content'); // atau 'borangContainer' mengikut HTML anda
+                const element = document.getElementById('print-preview-content');
                 
-                // Simpan gaya asal jika perlu
                 const originalShadow = element.style.boxShadow;
                 const originalMargin = element.style.margin;
                 
@@ -1412,9 +1393,9 @@
                 const opt = {
                     margin:       0, 
                     filename:     `Borang_PRV_ALT_${this.currentPrintSerialNo}.pdf`,
-                    image:        { type: 'jpeg', quality: 1.0 }, // Tetapkan kualiti maksimum (1.0)
+                    image:        { type: 'jpeg', quality: 1.0 },
                     html2canvas:  { 
-                        scale: 3,            // Skala 3 untuk ketajaman maksimum (seperti sistem ALD)
+                        scale: 3,
                         useCORS: true, 
                         letterRendering: true,
                         scrollY: 0,
@@ -1427,7 +1408,7 @@
                     element.style.boxShadow = originalShadow;
                     element.style.margin = originalMargin;
                     this.showToast('PDF berjaya dimuat turun!', 'success');
-                }).catch((err) => {
+                }).catch(() => {
                     element.style.boxShadow = originalShadow;
                     element.style.margin = originalMargin;
                     this.showToast('Gagal menjana PDF', 'error');
