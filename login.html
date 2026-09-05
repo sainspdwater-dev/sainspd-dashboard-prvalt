@@ -291,14 +291,13 @@
 
         <div class="info-bubbles">
             <span>💧 Milik SAINSPD</span>
-            <span>🔒 Encrypted</span>
+            <span>🔒 Secure Gateway</span>
         </div>
     </div>
 
     <script>
         (function() {
             const CONFIG = {
-                SECRET_KEY: 'PRV_ALT_SAINSPD_2026_SECURE',
                 API_URL: 'https://dashboardprvalt.sainspdwater.workers.dev/',
                 MAX_RETRY: 3,
                 RETRY_DELAY: 2000,
@@ -354,7 +353,6 @@
             function attemptLogin(username, hashedPassword, retryCount = 0) {
                 const payload = {
                     action: 'authenticate',
-                    internalSecret: CONFIG.SECRET_KEY,
                     username: username,
                     password: hashedPassword
                 };
